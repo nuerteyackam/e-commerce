@@ -23,3 +23,11 @@ export async function deleteCustomerCtr(id) {
   }
   return deletedCustomer;
 }
+
+export async function getCustomerCtr(email, password) {
+  const result = await Customer.getCustomerByEmailAndpassword(email, password);
+  if (!result.success) {
+    throw new Error(result.message);
+  }
+  return result.customer;
+}

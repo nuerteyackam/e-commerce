@@ -6,7 +6,26 @@
     <title>Lab 2</title>
 </head>
 <body>
-   
+   <h1>HELLO WORLD!</h1>
+   <button id="logout-btn">logout</button>
 </body>
+<script>
+  document.getElementById("logout-btn").addEventListener("click", async () => {
+    try {
+      const res = await fetch("/logout", { method: "POST" });
+      const data = await res.json();
+
+      if (data.success) {
+        window.location.href = "/login"; 
+      } else {
+        alert("Logout failed. Try again.");
+      }
+    } catch (err) {
+      console.error("Error logging out:", err);
+      alert("Something went wrong.");
+    }
+  });
+</script>
+
 </html>
 

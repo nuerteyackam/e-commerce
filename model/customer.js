@@ -58,6 +58,26 @@ class Customer {
     const result = await pool.query(query, [email]);
     return result.rowCount > 0;
   }
+
+  static async getCustomerByEmailAndpassword(email, password) {
+    const query = `SELECT * FROM customer WHERE customer_email = $1;`;
+    const result = await pool.query(query, [email]);
+    if (!result) {
+      return { success: false, message: "Customer not found" };
+    }
+
+    const customer = result.rows[0];
+    const isCorrectPassword = await bcrypt.compare(
+      password,
+      customer.customer_pass
+    );
+
+    if (!isCorrectPassword) {
+      return { success: false, message: "Incorrect Password!" };
+    }
+
+    return { success: true, customer };
+  }
 }
 
 export default Customer;
