@@ -21,4 +21,12 @@ router.post("/", async (req, res) => {
   }
 });
 
+// session check
+router.get("/me", async (req, res) => {
+  if (req.session.user) {
+    res.json({ loggedIn: true, user: req.session.user });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
 export default router;

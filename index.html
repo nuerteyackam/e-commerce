@@ -7,9 +7,25 @@
 </head>
 <body>
    <h1>HELLO WORLD!</h1>
+   <span id="welcome"></span>  
    <button id="logout-btn">logout</button>
 </body>
+
+<script src="/JS/core.js"></script>
+
 <script>
+    isLoggedIn().then(loggedIn => {
+    if (!loggedIn) {
+      window.location.href = "/login.html";
+    } else {
+      getCurrentUser().then(data => {
+        if (data.user) {
+          document.getElementById("welcome").textContent = `Welcome, ${data.user.customer_name}!`;
+        }
+      });
+    }
+  });
+  
   document.getElementById("logout-btn").addEventListener("click", async () => {
     try {
       const res = await fetch("/logout", { method: "POST" });
