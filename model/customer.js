@@ -59,10 +59,10 @@ class Customer {
     return result.rowCount > 0;
   }
 
-  static async getCustomerByEmailAndpassword(email, password) {
+  static async getCustomerByEmailAndPassword(email, password) {
     const query = `SELECT * FROM customer WHERE customer_email = $1;`;
     const result = await pool.query(query, [email]);
-    if (!result) {
+    if (result.rowCount === 0) {
       return { success: false, message: "Customer not found" };
     }
 
@@ -76,6 +76,7 @@ class Customer {
       return { success: false, message: "Incorrect Password!" };
     }
 
+    delete customer.customer_pass;
     return { success: true, customer };
   }
 }

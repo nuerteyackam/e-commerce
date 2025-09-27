@@ -9,10 +9,10 @@ router.post("/", async (req, res) => {
     const customer = await getCustomerCtr(email, password);
 
     req.session.user = {
-      id: customer.customer_id,
-      name: customer.customer_name,
-      role: customer.user_role,
-      email: customer.customer_email,
+      customer_id: customer.customer_id,
+      customer_name: customer.customer_name,
+      user_role: customer.user_role,
+      customer_email: customer.customer_email,
     };
 
     res.json({ success: true, message: "Login successful", customer });

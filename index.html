@@ -7,40 +7,81 @@
 </head>
 <body>
    <h1>HELLO WORLD!</h1>
-   <span id="welcome"></span>  
-   <button id="logout-btn">logout</button>
+   
+   
+   <nav id="userMenu">
+     <p>Loading menu...</p>
+   </nav>
+   
+   <span id="welcome"></span>
+   <button id="logout-btn" style="display: none;">Logout</button>
 </body>
 
 <script src="/JS/core.js"></script>
 
 <script>
-    isLoggedIn().then(loggedIn => {
+  (async () => {
+    const loggedIn = await isLoggedIn();
+    const menuElement = document.getElementById('userMenu');
+    
     if (!loggedIn) {
-      window.location.href = "/login.html";
+      // If not logged in, show Register | Login
+      menuElement.innerHTML = '<a href="/pages/register.html">Register</a> | <a href="/pages/login.html">Login</a>';
     } else {
-      getCurrentUser().then(data => {
-        if (data.user) {
-          document.getElementById("welcome").textContent = `Welcome, ${data.user.customer_name}!`;
-        }
-      });
-    }
-  });
-  
-  document.getElementById("logout-btn").addEventListener("click", async () => {
-    try {
-      const res = await fetch("/logout", { method: "POST" });
-      const data = await res.json();
+      const response = await getCurrentUser();
+      console.log("Full response:", response);  
+      console.log("User data:", response?.user);
 
-      if (data.success) {
-        window.location.href = "/login"; 
-      } else {
-        alert("Logout failed. Try again.");
+      const currentUser = response?.user;
+      
+      // Show welcome message
+      if (currentUser) {
+        document.getElementById("welcome").textContent = `Welcome, ${currentUser.customer_name}!`;
       }
-    } catch (err) {
-      console.error("Error logging out:", err);
-      alert("Something went wrong.");
+      
+      const userIsAdmin = await isAdmin();
+      if (userIsAdmin) {
+        // If logged in and admin, show Logout | Category
+        menuElement.innerHTML = '<a href="/admin/category">Category</a> | <button id="nav-logout-btn">Logout</button>';
+        
+        // Add logout functionality to nav button
+        document.getElementById('nav-logout-btn').addEventListener('click', async () => {
+          try {
+            const res = await fetch("/logout", { method: "POST" });
+            const data = await res.json();
+            if (data.success) {
+              window.location.href = "/pages/login.html";
+            } else {
+              alert("Logout failed. Try again.");
+            }
+          } catch (err) {
+            console.error("Error logging out:", err);
+            alert("Something went wrong.");
+          }
+        });
+        
+      } else {
+        // If logged in but not admin, show just Logout
+        menuElement.innerHTML = '<button id="nav-logout-btn">Logout</button>';
+        
+      
+        document.getElementById('nav-logout-btn').addEventListener('click', async () => {
+          try {
+            const res = await fetch("/logout", { method: "POST" });
+            const data = await res.json();
+            if (data.success) {
+              window.location.href = "/pages/login.html";
+            } else {
+              alert("Logout failed. Try again.");
+            }
+          } catch (err) {
+            console.error("Error logging out:", err);
+            alert("Something went wrong.");
+          }
+        });
+      }
     }
-  });
+  })();
 </script>
 
 </html>

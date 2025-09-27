@@ -25,7 +25,7 @@ export async function deleteCustomerCtr(id) {
 }
 
 export async function getCustomerCtr(email, password) {
-  const result = await Customer.getCustomerByEmailAndpassword(email, password);
+  const result = await Customer.getCustomerByEmailAndPassword(email, password);
   if (!result.success) {
     throw new Error(result.message);
   }

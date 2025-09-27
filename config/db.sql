@@ -13,8 +13,12 @@ CREATE TABLE brands (
 -- Table: categories
 CREATE TABLE categories (
     cat_id SERIAL PRIMARY KEY,
-    cat_name VARCHAR(100) NOT NULL
+    cat_name VARCHAR(100) NOT NULL,
+    created_by INT NOT NULL,
+    CONSTRAINT fk_categories_user FOREIGN KEY (created_by) REFERENCES (customer_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 
 -- Table: customer
 CREATE TABLE customer (

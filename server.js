@@ -31,21 +31,28 @@ app.use("/JS", express.static(path.join(dirname, "JS")));
 import registerRouter from "./Actions/registerCustomerAction.js";
 import loginRouter from "./Actions/loginCustomerAction.js";
 import logoutRouter from "./Actions/logoutCustomerAction.js";
+import addCategoryRouter from "./Actions/addCategoryAction.js";
+import fetchCategoryRouter from "./Actions/fetchCategoryAction.js";
+import updateCategoryRouter from "./Actions/updateCategoryAction.js";
+import deleteCategoryRouter from "./Actions/deleteCategoryAction.js";
 
 // Mount routers for customer authentication actions/routes
 app.use("/register", registerRouter);
 app.use("/login", loginRouter);
 app.use("/logout", logoutRouter);
+app.use("/add-category", addCategoryRouter);
+app.use("/fetch-categories", fetchCategoryRouter);
+app.use("/update-category", updateCategoryRouter);
+app.use("/delete-category", deleteCategoryRouter);
 
 // serving html pages
-app.get("/register", (req, res) => {
-  res.sendFile(path.join(dirname, "views", "register.html"));
-});
-app.get("/login", (req, res) => {
-  res.sendFile(path.join(dirname, "views", "login.html"));
-});
+
+app.use("/pages", express.static(path.join(dirname, "views")));
 app.get("/index.html", (req, res) => {
   res.sendFile(path.join(dirname, "index.html"));
+});
+app.get("/admin/category", (req, res) => {
+  res.sendFile(path.join(dirname, "views", "admin", "category.html"));
 });
 
 const PORT = process.env.PORT || 5000;

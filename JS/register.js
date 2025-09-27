@@ -54,7 +54,7 @@ document
       alert(response.message);
 
       if (response.success) {
-        window.location.href = "/login.html";
+        window.location.href = "/pages/login.html";
       }
     } catch (err) {
       console.log("Failed to register:", err);
