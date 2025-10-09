@@ -1,26 +1,6 @@
--- PostgreSQL-compatible SQL schema for "shoppin"
+-- PostgreSQL-compatible SQL schema for "shoppn"
 
--- Drop schema if needed (be careful, it deletes everything!)
--- DROP SCHEMA public CASCADE;
--- CREATE SCHEMA public;
-
--- Table: brands
-CREATE TABLE brands (
-    brand_id SERIAL PRIMARY KEY,
-    brand_name VARCHAR(100) NOT NULL
-);
-
--- Table: categories
-CREATE TABLE categories (
-    cat_id SERIAL PRIMARY KEY,
-    cat_name VARCHAR(100) NOT NULL,
-    created_by INT NOT NULL,
-    CONSTRAINT fk_categories_user FOREIGN KEY (created_by) REFERENCES (customer_id)
-    ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-
--- Table: customer
+-- Table: customer (MUST BE FIRST - other tables reference it)
 CREATE TABLE customer (
     customer_id SERIAL PRIMARY KEY,
     customer_name VARCHAR(100) NOT NULL,
@@ -30,7 +10,25 @@ CREATE TABLE customer (
     customer_city VARCHAR(30) NOT NULL,
     customer_contact VARCHAR(15) NOT NULL,
     customer_image VARCHAR(100),
-    user_role INT NOT NULL
+    user_role INT NOT NULL DEFAULT 2,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: brands
+CREATE TABLE brands (
+    brand_id SERIAL PRIMARY KEY,
+    brand_name VARCHAR(100) NOT NULL
+);
+
+-- Table: categories (now customer table exists)
+CREATE TABLE categories (
+    cat_id SERIAL PRIMARY KEY,
+    cat_name VARCHAR(100) NOT NULL,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_categories_user FOREIGN KEY (created_by) REFERENCES customer (customer_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Table: products
@@ -39,10 +37,11 @@ CREATE TABLE products (
     product_cat INT NOT NULL,
     product_brand INT NOT NULL,
     product_title VARCHAR(200) NOT NULL,
-    product_price DOUBLE PRECISION NOT NULL,
+    product_price DECIMAL(10,2) NOT NULL,
     product_desc VARCHAR(500),
     product_image VARCHAR(100),
     product_keywords VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_products_cat FOREIGN KEY (product_cat) REFERENCES categories (cat_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_products_brand FOREIGN KEY (product_brand) REFERENCES brands (brand_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -79,7 +78,7 @@ CREATE TABLE orderdetails (
 -- Table: payment
 CREATE TABLE payment (
     pay_id SERIAL PRIMARY KEY,
-    amt DOUBLE PRECISION NOT NULL,
+    amt DECIMAL(10,2) NOT NULL,
     customer_id INT NOT NULL,
     order_id INT NOT NULL,
     currency TEXT NOT NULL,
@@ -87,3 +86,4 @@ CREATE TABLE payment (
     CONSTRAINT fk_payment_customer FOREIGN KEY (customer_id) REFERENCES customer (customer_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
