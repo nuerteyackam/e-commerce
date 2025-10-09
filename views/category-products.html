@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Category Products</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="categoryTitle">Category Products</h1>
+      <a href="/admin/category">← Back to Categories</a>
+
+      <div id="productsContainer" class="product-grid">
+        <p class="loading">Loading products...</p>
+      </div>
+    </div>
+
+    <script src="/JS/core.js"></script>
+    <script>
+      // Get category ID from URL
+      const pathParts = window.location.pathname.split("/");
+      const categoryId = pathParts[pathParts.length - 1];
+
+      // Load category details
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          // Fetch just the category name to display
+          const response = await fetch(`/fetch-categories`);
+          const data = await response.json();
+
+          if (data.success) {
+            const category = data.categories.find(
+              (c) => c.cat_id == categoryId
+            );
+            if (category) {
+              document.getElementById("categoryTitle").textContent =
+                category.cat_name || "Category Products";
+              document.title = `${category.cat_name} - Products`;
+            }
+
+            document.getElementById("productsContainer").innerHTML = `
+                        <div class="product-info">
+                            <h3>Products coming soon!</h3>
+                            <p>This category has ID: ${categoryId}</p>
+                            <p>This is a placeholder for future product listings.</p>
+                        </div>
+                    `;
+          }
+        } catch (error) {
+          console.error("Error loading category:", error);
+          document.getElementById("productsContainer").innerHTML =
+            "<p>Error loading category details.</p>";
+        }
+      });
+    </script>
+  </body>
+</html>

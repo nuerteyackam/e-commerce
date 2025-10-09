@@ -96,11 +96,11 @@ async function loadCategories() {
       container.innerHTML = data.categories
         .map(
           (category) => `
-                <div class="category-item">
+                <div class="category-item clickable" onclick="viewCategory(${category.cat_id}, '${category.cat_name}')">
                     <span class="category-name">${category.cat_name}</span>
-                    <div class="category-actions">
-                        <button class="btn btn-secondary" onclick="openUpdateModal(${category.cat_id}, '${category.cat_name}')">Edit</button>
-                        <button class="btn btn-danger" onclick="openDeleteModal(${category.cat_id}, '${category.cat_name}')">Delete</button>
+                    <div class="category-actions" onclick="event.stopPropagation()">
+                        <button class="btn secondary" onclick="openUpdateModal(${category.cat_id}, '${category.cat_name}')">Edit</button>
+                        <button class="btn danger" onclick="openDeleteModal(${category.cat_id}, '${category.cat_name}')">Delete</button>
                     </div>
                 </div>
             `
@@ -226,3 +226,7 @@ window.addEventListener("click", (e) => {
     closeDeleteModal();
   }
 });
+
+function viewCategory(catId, catName) {
+  window.location.href = `/category/${catId}`;
+}

@@ -51,8 +51,16 @@ app.use("/pages", express.static(path.join(dirname, "views")));
 app.get("/index.html", (req, res) => {
   res.sendFile(path.join(dirname, "index.html"));
 });
+app.get("/", (req, res) => {
+  res.sendFile(path.join(dirname, "index.html"));
+});
 app.get("/admin/category", (req, res) => {
   res.sendFile(path.join(dirname, "views", "admin", "category.html"));
+});
+
+
+app.get("/category/:id", (req, res) => {
+  res.sendFile(path.join(dirname, "views", "category-products.html"));
 });
 
 const PORT = process.env.PORT || 5000;
