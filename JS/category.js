@@ -87,7 +87,7 @@ async function handleAddCategory(e) {
 // Load and display categories
 async function loadCategories() {
   try {
-    const response = await fetch("/fetch-categories");
+    const response = await fetch("/fetch-categories?userOnly=true");
     const data = await response.json();
 
     const container = document.getElementById("categoriesContainer");

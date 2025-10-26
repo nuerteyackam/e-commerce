@@ -26,6 +26,10 @@ export async function getCategoriesCtr(userId) {
   return await Category.getCategoriesByUser(userId);
 }
 
+export async function getAllCategoriesCtr() {
+  return await Category.getAllCategories();
+}
+
 export async function updateCategoryCtr(catId, userId, { cat_name }) {
   if (!catId || !userId) {
     throw new Error("Category Id and User Id required");

@@ -32,7 +32,8 @@ document
       alert(response.message);
 
       if (response.success) {
-        window.location.href = "/index.html";
+        // Use the redirect URL from server response
+        window.location.href = response.redirect;
         console.log(response.customer);
       } else {
         alert("Login failed. Please check your email or password.");

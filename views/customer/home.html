@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Commerce Store</title>
+    <link rel="stylesheet" href="/CSS/style.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="/" class="nav-logo">E-Commerce Store</a>
+        <div class="nav-menu" id="navMenu">
+          <a href="/" class="nav-link nav-link-active">Home</a>
+          <a href="/all-products" class="nav-link">All Products</a>
+          <span id="userInfo">Loading...</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="page-header">
+        <h1 id="welcomeMessage">Welcome to E-Commerce Store</h1>
+        <p>Discover amazing products at great prices</p>
+      </div>
+
+      <div style="text-align: center; margin: 3rem 0">
+        <a
+          href="/all-products"
+          class="btn-view"
+          style="padding: 1rem 2rem; font-size: 1.1rem"
+        >
+          Browse All Products
+        </a>
+      </div>
+
+      <div
+        id="adminLink"
+        style="text-align: center; margin: 2rem 0; display: none"
+      >
+        <p><a href="/admin">Admin Dashboard</a></p>
+      </div>
+    </div>
+
+    <script src="/JS/core.js"></script>
+    <script>
+      (async () => {
+        const loggedIn = await isLoggedIn();
+        const navMenu = document.getElementById("navMenu");
+        const welcomeMessage = document.getElementById("welcomeMessage");
+        const adminLink = document.getElementById("adminLink");
+
+        if (!loggedIn) {
+          // Not logged in - show login/register
+          document.getElementById("userInfo").innerHTML =
+            '<a href="/pages/login.html" class="nav-link">Login</a><a href="/pages/register.html" class="nav-link">Register</a>';
+        } else {
+          // User is logged in
+          const response = await getCurrentUser();
+          const currentUser = response?.user;
+
+          if (currentUser) {
+            // Update welcome message
+            welcomeMessage.textContent = `Welcome back, ${currentUser.customer_name}!`;
+
+            // Check if admin
+            const userIsAdmin = await isAdmin();
+            if (userIsAdmin) {
+              adminLink.style.display = "block";
+            }
+
+            // Show user info and logout
+            document.getElementById(
+              "userInfo"
+            ).innerHTML = `<span class="nav-user">Hi, ${currentUser.customer_name}</span><button id="logoutBtn" class="nav-logout-btn">Logout</button>`;
+
+            // Add logout functionality
+            const logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+              logoutBtn.addEventListener("click", async () => {
+                try {
+                  const res = await fetch("/logout", { method: "POST" });
+                  const data = await res.json();
+                  if (data.success) {
+                    window.location.href = "/pages/login.html";
+                  } else {
+                    alert("Logout failed. Try again.");
+                  }
+                } catch (err) {
+                  console.error("Error logging out:", err);
+                  alert("Something went wrong.");
+                }
+              });
+            }
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

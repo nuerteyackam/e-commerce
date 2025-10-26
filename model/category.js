@@ -28,6 +28,18 @@ class Category {
     }
   }
 
+  // Get ALL categories (for customer browsing)
+  static async getAllCategories() {
+    try {
+      const query = `SELECT * FROM categories ORDER BY cat_name`;
+      const result = await pool.query(query);
+      return result.rows;
+    } catch (err) {
+      console.error("Database error:", err);
+      throw err;
+    }
+  }
+
   // Update category
   static async updateCategory(catId, userId, { cat_name }) {
     try {

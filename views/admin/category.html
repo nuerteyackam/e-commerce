@@ -7,6 +7,24 @@
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <h2>GameVault</h2>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/admin/category" class="nav-link nav-link-active"
+          >Categories</a
+        >
+        <a href="/admin/brand" class="nav-link">Brands</a>
+        <a href="/admin/product" class="nav-link">Products</a>
+        <span class="nav-user">Admin Panel</span>
+        <button id="logout-btn" class="nav-logout-btn" onclick="logout()">
+          Logout
+        </button>
+      </div>
+    </nav>
     <div class="container">
       <h1>Category Management</h1>
 

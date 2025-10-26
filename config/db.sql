@@ -14,13 +14,7 @@ CREATE TABLE customer (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table: brands
-CREATE TABLE brands (
-    brand_id SERIAL PRIMARY KEY,
-    brand_name VARCHAR(100) NOT NULL
-);
-
--- Table: categories (now customer table exists)
+-- Table: categories 
 CREATE TABLE categories (
     cat_id SERIAL PRIMARY KEY,
     cat_name VARCHAR(100) NOT NULL,
@@ -30,6 +24,14 @@ CREATE TABLE categories (
     CONSTRAINT fk_categories_user FOREIGN KEY (created_by) REFERENCES customer (customer_id)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+-- Table: brands
+CREATE TABLE brands (
+    brand_id SERIAL PRIMARY KEY,
+    brand_name VARCHAR(100) NOT NULL
+);
+
+
 
 -- Table: products
 CREATE TABLE products (
@@ -87,3 +89,40 @@ CREATE TABLE payment (
     CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- Add new columns to existing brands table
+ALTER TABLE brands ADD COLUMN IF NOT EXISTS created_by INT;
+ALTER TABLE brands ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE brands ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE brands ADD COLUMN IF NOT EXISTS category_id INT;
+
+DO $$ 
+BEGIN
+    -- Add category foreign key constraint
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_brands_category') THEN
+        ALTER TABLE brands ADD CONSTRAINT fk_brands_category 
+            FOREIGN KEY (category_id) REFERENCES categories (cat_id) 
+            ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+    
+    -- Add user foreign key constraint
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_brands_user') THEN
+        ALTER TABLE brands ADD CONSTRAINT fk_brands_user 
+            FOREIGN KEY (created_by) REFERENCES customer (customer_id) 
+            ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+    
+    -- Add unique constraint
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'unique_brand_category') THEN
+        ALTER TABLE brands ADD CONSTRAINT unique_brand_category 
+            UNIQUE (brand_name, category_id);
+    END IF;
+END $$;
+
+-- Make columns NOT NULL (safe since brands table is empty)
+ALTER TABLE brands ALTER COLUMN created_by SET NOT NULL;
+ALTER TABLE brands ALTER COLUMN category_id SET NOT NULL;
+
+ALTER TABLE products ADD COLUMN IF NOT EXISTS product_qty INT DEFAULT 0;
+
+-- Increase product_image column size to handle JSON
+ALTER TABLE products ALTER COLUMN product_image TYPE TEXT;

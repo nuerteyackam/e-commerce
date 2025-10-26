@@ -1,8 +1,8 @@
 import express from "express";
 import {
-  getCategoriesCtr,
-  getAllCategoriesCtr,
-} from "../controllers/categoryController.js";
+  getBrandsCtr,
+  getAllBrandsCtr,
+} from "../controllers/brandController.js";
 
 const router = express.Router();
 
@@ -24,25 +24,25 @@ router.get("/", async (req, res) => {
       }
 
       const userId = req.session.user.customer_id;
-      const categories = await getCategoriesCtr(userId);
+      const brands = await getBrandsCtr(userId);
 
       res.json({
         success: true,
-        message: "Categories fetched successfully",
-        categories,
+        message: "Brands fetched successfully",
+        brands,
       });
     } else {
-      // Public access - get ALL categories for customer browsing
-      const categories = await getAllCategoriesCtr();
+      // Public access - get ALL brands for customer browsing
+      const brands = await getAllBrandsCtr();
 
       res.json({
         success: true,
-        message: "Categories fetched successfully",
-        categories,
+        message: "Brands fetched successfully",
+        brands,
       });
     }
   } catch (err) {
-    console.error("Fetch categories error:", err);
+    console.error("Fetch brands error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });

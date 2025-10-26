@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Products - E-Commerce Store</title>
+    <link rel="stylesheet" href="/CSS/style.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="/" class="nav-logo">E-Commerce Store</a>
+        <div class="nav-menu">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/all-products" class="nav-link nav-link-active"
+            >All Products</a
+          >
+          <a href="/pages/login.html" class="nav-link">Login</a>
+          <a href="/pages/register.html" class="nav-link">Register</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1>All Products</h1>
+        <p>Discover our amazing collection of products</p>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="categoryFilter">Category</label>
+            <select id="categoryFilter" class="filter-select">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="brandFilter">Brand</label>
+            <select id="brandFilter" class="filter-select">
+              <option value="">All Brands</option>
+            </select>
+          </div>
+
+          <div class="search-group">
+            <label for="searchInput">Search Products</label>
+            <div class="search-container">
+              <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="Search by product name, keywords..."
+              />
+              <button type="button" id="searchBtn" class="search-btn">
+                Search
+              </button>
+              <button type="button" id="clearBtn" class="clear-btn">
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Header -->
+      <div class="products-header">
+        <div class="products-count" id="productsCount">Loading products...</div>
+        <div class="sort-container">
+          <label for="sortSelect">Sort by:</label>
+          <select id="sortSelect" class="sort-select">
+            <option value="newest">Newest First</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="name_asc">Name: A to Z</option>
+            <option value="name_desc">Name: Z to A</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid customer" id="productsGrid">
+        <div class="loading">
+          <p>Loading products...</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination" style="display: none">
+        <button id="prevBtn" class="pagination-btn">« Previous</button>
+        <div class="pagination-info" id="paginationInfo"></div>
+        <button id="nextBtn" class="pagination-btn">Next »</button>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/JS/core.js"></script>
+    <script src="/JS/products.js"></script>
+  </body>
+</html>

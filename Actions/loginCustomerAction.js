@@ -15,7 +15,22 @@ router.post("/", async (req, res) => {
       customer_email: customer.customer_email,
     };
 
-    res.json({ success: true, message: "Login successful", customer });
+    // Determine redirect based on user role
+    let redirectUrl;
+    if (customer.user_role === 1) {
+      // Admin user - redirect to admin dashboard
+      redirectUrl = "/admin";
+    } else {
+      // Regular user - redirect to customer home
+      redirectUrl = "/";
+    }
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      customer,
+      redirect: redirectUrl,
+    });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -29,4 +44,5 @@ router.get("/me", async (req, res) => {
     res.json({ loggedIn: false });
   }
 });
+
 export default router;

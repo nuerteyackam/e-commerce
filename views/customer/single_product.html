@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Details - E-Commerce Store</title>
+    <link rel="stylesheet" href="/CSS/style.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="/" class="nav-logo">E-Commerce Store</a>
+        <div class="nav-menu">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/all-products" class="nav-link">All Products</a>
+          <a href="/pages/login.html" class="nav-link">Login</a>
+          <a href="/pages/register.html" class="nav-link">Register</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb" id="breadcrumb">
+        <a href="/">Home</a> > <a href="/all-products">All Products</a> >
+        <span>Loading...</span>
+      </div>
+
+      <!-- Product Details -->
+      <div id="productContent">
+        <div class="loading">
+          <p>Loading product details...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="image-modal" id="imageModal">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <img class="modal-image" id="modalImage" src="" alt="" />
+    </div>
+
+    <!-- Scripts -->
+    <script src="/JS/core.js"></script>
+    <script src="/JS/singleProduct.js"></script>
+  </body>
+</html>

@@ -40,10 +40,11 @@
             const userIsAdmin = await isAdmin();
             if (userIsAdmin) {
               // Admin user - show Category Management + user info + logout
-              topNavElement.innerHTML = `<a href="/admin/category" class="nav-link">Category Management</a><span class="nav-user">Hi, ${currentUser.customer_name}</span><button id="nav-logout-btn" class="nav-logout-btn">Logout</button>`;
+              topNavElement.innerHTML = `<a href="/admin/category" class="nav-link">Categories</a><a href="/admin/brand" class="nav-link">Brands</a><a href="/admin/product" class="nav-link">Products</a><span class="nav-user">Hi, ${currentUser.customer_name}</span><button id="nav-logout-btn" class="nav-logout-btn">Logout</button>`;
             } else {
-              // Regular user - show just user info + logout
-              topNavElement.innerHTML = `<span class="nav-user">Hi, ${currentUser.customer_name}</span><button id="nav-logout-btn" class="nav-logout-btn">Logout</button>`;
+              // Regular user - redirect to customer home page
+              window.location.href = "/";
+              return;
             }
 
             // Add logout functionality
