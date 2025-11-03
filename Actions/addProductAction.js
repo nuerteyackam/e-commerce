@@ -89,6 +89,9 @@ const upload = multer({
 });
 
 router.post("/", upload.array("product_images", 5), async (req, res) => {
+ 
+
+
   try {
     console.log("=== ADD PRODUCT DEBUG ===");
     console.log("Session user:", req.session.user?.customer_name);

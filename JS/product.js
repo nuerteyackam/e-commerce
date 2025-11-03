@@ -1,8 +1,5 @@
 console.log("Loading product.js at:", new Date().toISOString());
-console.log(
-  "Checking if product.js already loaded:",
-  window.productJsLoaded
-);
+console.log("Checking if product.js already loaded:", window.productJsLoaded);
 
 if (window.productJsLoaded) {
   console.log("WARNING: product.js is being loaded multiple times!");
@@ -440,7 +437,7 @@ async function handleProductSubmit(e) {
 
   //  PREVENT DOUBLE SUBMISSION
   if (isSubmitting) {
-    console.log("❌ DUPLICATE SUBMISSION BLOCKED at:", timestamp);
+    console.log("DUPLICATE SUBMISSION BLOCKED at:", timestamp);
     return false;
   }
 
@@ -464,6 +461,11 @@ async function handleProductSubmit(e) {
     }
 
     const formData = new FormData(productForm);
+
+    if (formData.has("product_images")) {
+      formData.delete("product_images");
+      console.log("Removed pre-populated product_images from FormData");
+    }
 
     // Add images
     if (imagesToUpload) {
@@ -521,10 +523,7 @@ async function handleProductSubmit(e) {
 
     // Add delay before resetting flag
     setTimeout(() => {
-      console.log(
-        "RESETTING isSubmitting flag at:",
-        new Date().toISOString()
-      );
+      console.log("RESETTING isSubmitting flag at:", new Date().toISOString());
       isSubmitting = false;
     }, 500);
   }

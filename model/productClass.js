@@ -304,7 +304,7 @@ class Product {
     }
   }
 
-  // Add these methods to your existing productClass.js
+
 
   // View all products with pagination
   static async viewAllProducts(page = 1, limit = 10) {
