@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart - GameVault</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <h2><a href="/">GameVault</a></h2>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/all-products" class="nav-link">Products</a>
+        <a href="/cart" class="nav-link nav-link-active">
+          Cart (<span class="cart-count" id="nav-cart-count">0</span>)
+        </a>
+        <span class="nav-user" id="nav-user-name">Guest</span>
+        <a href="/pages/login.html" class="nav-link" id="nav-login">Login</a>
+        <button
+          id="nav-logout-btn"
+          class="nav-logout-btn"
+          style="display: none"
+        >
+          Logout
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="cart-header">
+        <h1>Shopping Cart</h1>
+        <button id="clearCartBtn" class="btn-clear-cart" style="display: none">
+          Clear Cart
+        </button>
+      </div>
+
+      <!-- Cart Content -->
+      <div id="cartContainer" class="cart-container">
+        <div class="loading">Loading cart...</div>
+      </div>
+
+      <!-- Cart Summary -->
+      <div id="cartSummary" class="cart-summary" style="display: none">
+        <div class="summary-content">
+          <h3>Order Summary</h3>
+          <div class="summary-line">
+            <span>Items:</span>
+            <span id="cartItemCount">0</span>
+          </div>
+          <div class="summary-line">
+            <span>Subtotal:</span>
+            <span id="cartSubtotal">$0.00</span>
+          </div>
+          <div class="summary-line">
+            <span>Shipping:</span>
+            <span>Free</span>
+          </div>
+          <div class="summary-line total">
+            <span>Total:</span>
+            <span id="cartTotal">$0.00</span>
+          </div>
+          <div class="cart-actions">
+            <button id="checkoutBtn" class="btn-checkout">
+              Proceed to Checkout
+            </button>
+            <a href="/all-products" class="btn-continue-shopping">
+              Continue Shopping
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/JS/core.js"></script>
+    <script src="/JS/cart.js"></script>
+  </body>
+</html>

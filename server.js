@@ -6,6 +6,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import session from "express-session";
 
+import { ensureCartSession } from "./middleware/cartSession.js";
+
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
@@ -25,6 +27,8 @@ app.use(
     cookie: { secure: false },
   })
 );
+
+app.use(ensureCartSession);
 
 app.use(express.static(path.join(dirname, "public")));
 app.use("/JS", express.static(path.join(dirname, "JS")));
@@ -54,6 +58,19 @@ import fetchBrandsByCategoryRouter from "./Actions/fetchBrandsByCategoryAction.j
 // Import customer product router
 import customerProductRouter from "./Actions/customerProductActions.js";
 
+// Import cart action routers
+import addToCartRouter from "./Actions/addToCartAction.js";
+import removeFromCartRouter from "./Actions/removeFromCartAction.js";
+import updateQuantityRouter from "./Actions/updateQuantityAction.js";
+import emptyCartRouter from "./Actions/emptyCartAction.js";
+import getCartRouter from "./Actions/getCartAction.js";
+
+// Import order action routers
+import processCheckoutRouter from "./Actions/processCheckoutAction.js";
+import processPaymentRouter from "./Actions/processPaymentAction.js";
+import getOrdersRouter from "./Actions/getOrdersAction.js";
+import getOrderDetailsRouter from "./Actions/getOrderDetailsAction.js";
+
 // Mount existing routers for customer authentication
 app.use("/register", registerRouter);
 app.use("/login", loginRouter);
@@ -82,6 +99,19 @@ app.use("/fetch-brands-by-category", fetchBrandsByCategoryRouter);
 // Customer product API routes
 app.use("/api/products", customerProductRouter);
 
+// Cart action routes
+app.use("/add-to-cart", addToCartRouter);
+app.use("/remove-from-cart", removeFromCartRouter);
+app.use("/update-quantity", updateQuantityRouter);
+app.use("/empty-cart", emptyCartRouter);
+app.use("/get-cart", getCartRouter);
+
+// Order action routes
+app.use("/process-checkout", processCheckoutRouter);
+app.use("/process-payment", processPaymentRouter);
+app.use("/get-orders", getOrdersRouter);
+app.use("/get-order-details", getOrderDetailsRouter);
+
 // Serving admin HTML pages
 app.use("/pages", express.static(path.join(dirname, "views")));
 
@@ -99,8 +129,21 @@ app.get("/all-products", (req, res) => {
   res.sendFile(path.join(dirname, "views", "customer", "all_products.html"));
 });
 
+// Cart page
+app.get("/cart", (req, res) => {
+  res.sendFile(path.join(dirname, "views", "customer", "cart.html"));
+});
+
 app.get("/product/:productId", (req, res) => {
   res.sendFile(path.join(dirname, "views", "customer", "single_product.html"));
+});
+
+app.get("/checkout", (req, res) => {
+  res.sendFile(path.join(dirname, "views", "customer", "checkout.html"));
+});
+
+app.get("/orders", (req, res) => {
+  res.sendFile(path.join(dirname, "views", "customer", "orders.html"));
 });
 
 // Admin pages

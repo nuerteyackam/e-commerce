@@ -14,6 +14,9 @@
       <div class="nav-links">
         <a href="/" class="nav-link">Home</a>
         <a href="/all-products" class="nav-link">All Products</a>
+        <a href="/cart" class="nav-link">
+          Cart (<span class="cart-count" id="nav-cart-count">0</span>)
+        </a>
         <span id="userInfo">Loading...</span>
       </div>
     </nav>
@@ -49,6 +52,9 @@
         const navMenu = document.getElementById("navMenu");
         const welcomeMessage = document.getElementById("welcomeMessage");
         const adminLink = document.getElementById("adminLink");
+
+        // Update cart count when page loads
+        await updateCartCountDisplay();
 
         if (!loggedIn) {
           // Not logged in - show login/register
@@ -95,6 +101,54 @@
           }
         }
       })();
+
+      // Function to update cart count display
+      async function updateCartCountDisplay() {
+        try {
+          const response = await fetch("/get-cart/count", {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            const cartCount = data.data.itemCount || 0;
+            const cartCountEl = document.getElementById("nav-cart-count");
+            if (cartCountEl) {
+              cartCountEl.textContent = cartCount;
+            }
+          } else {
+            // Cart is empty or error occurred
+            const cartCountEl = document.getElementById("nav-cart-count");
+            if (cartCountEl) {
+              cartCountEl.textContent = "0";
+            }
+          }
+        } catch (error) {
+          console.error("Error updating cart count:", error);
+          // Set cart count to 0 on error
+          const cartCountEl = document.getElementById("nav-cart-count");
+          if (cartCountEl) {
+            cartCountEl.textContent = "0";
+          }
+        }
+      }
+
+      // Listen for cart updates from other pages
+      window.addEventListener("storage", (e) => {
+        if (e.key === "cartUpdated") {
+          updateCartCountDisplay();
+        }
+      });
+
+      // Listen for custom cart update events
+      document.addEventListener("cartUpdated", () => {
+        updateCartCountDisplay();
+      });
     </script>
   </body>
 </html>

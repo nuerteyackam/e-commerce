@@ -1,17 +1,5 @@
-console.log("Loading product.js at:", new Date().toISOString());
-console.log("Checking if product.js already loaded:", window.productJsLoaded);
-
-if (window.productJsLoaded) {
-  console.log("WARNING: product.js is being loaded multiple times!");
-} else {
-  console.log("First time loading product.js");
-  window.productJsLoaded = true;
-}
-
 // Check if user is logged in and is admin when page loads
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("=== DOM CONTENT LOADED ===");
-
   const loggedIn = await isLoggedIn();
   if (!loggedIn) {
     window.location.href = "/pages/login.html";

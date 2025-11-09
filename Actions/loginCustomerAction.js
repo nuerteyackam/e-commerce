@@ -1,5 +1,6 @@
 import express from "express";
 import { getCustomerCtr } from "../controllers/customerController.js";
+import CartClass from "../model/cartClass.js";
 
 const router = express.Router();
 
@@ -8,12 +9,34 @@ router.post("/", async (req, res) => {
   try {
     const customer = await getCustomerCtr(email, password);
 
+    // Store guest cart session ID before login
+    const guestCartSessionId = req.session.cartSessionId;
+
     req.session.user = {
       customer_id: customer.customer_id,
       customer_name: customer.customer_name,
       user_role: customer.user_role,
       customer_email: customer.customer_email,
     };
+
+    if (guestCartSessionId) {
+      console.log(
+        `Transferring cart from session ${guestCartSessionId} to customer ${customer.customer_id}`
+      );
+
+      const cart = new CartClass();
+      const transferResult = await cart.transferCartToUser(
+        guestCartSessionId,
+        customer.customer_id
+      );
+      if (transferResult.success) {
+        console.log("Cart transfer successful");
+        // Clear guest cart session ID after successful transfer
+        delete req.session.cartSessionId;
+      } else {
+        console.error("Cart transfer failed:", transferResult.message);
+      }
+    }
 
     // Determine redirect based on user role
     let redirectUrl;
@@ -39,9 +62,35 @@ router.post("/", async (req, res) => {
 // session check
 router.get("/me", async (req, res) => {
   if (req.session.user) {
-    res.json({ loggedIn: true, user: req.session.user });
+    // Get cart count for logged in user
+    const cart = new CartClass();
+    const cartResult = await cart.getCartCount(
+      null,
+      req.session.user.customer_id
+    );
+
+    res.json({
+      loggedIn: true,
+      user: req.session.user,
+      cartCount: cartResult.success ? cartResult.data.totalQuantity : 0,
+    });
   } else {
-    res.json({ loggedIn: false });
+    // Get cart count for guest user
+    let cartCount = 0;
+    if (req.session.cartSessionId) {
+      const cart = new CartClass();
+      const cartResult = await cart.getCartCount(
+        req.session.cartSessionId,
+        null
+      );
+      cartCount = cartResult.success ? cartResult.data.totalQuantity : 0;
+    }
+
+    res.json({
+      loggedIn: false,
+      cartCount: cartCount,
+      guestSessionId: req.session.cartSessionId, // For debugging
+    });
   }
 });
 

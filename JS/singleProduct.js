@@ -31,6 +31,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Set up event listeners
   setupEventListeners();
 
+  // Update cart count on page load
+  await updateCartCountDisplay();
+
   // Get product ID from URL
   const productId = getProductIdFromUrl();
 
@@ -481,21 +484,79 @@ function showError(message) {
   }
 }
 
-// Add to cart function (placeholder for now)
-function addToCart(productId) {
-  if (!currentProduct || currentProduct.product_qty === 0) {
-    alert("This product is out of stock");
-    return;
-  }
+// Add product to cart
+async function addToCart(productId) {
+  try {
+    console.log(
+      "Adding product to cart:",
+      productId,
+      "Quantity:",
+      selectedQuantity
+    );
 
-  alert(
-    `Add to Cart functionality coming soon!\nProduct: ${currentProduct.product_title}\nQuantity: ${selectedQuantity}`
-  );
-  console.log("Adding to cart:", {
-    productId: productId,
-    quantity: selectedQuantity,
-    product: currentProduct,
-  });
+    // Disable button during request
+    if (addToCartBtn) {
+      addToCartBtn.disabled = true;
+      addToCartBtn.textContent = "Adding...";
+    }
+
+    const response = await fetch("/add-to-cart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        productId: productId,
+        quantity: selectedQuantity,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Show success message with actual quantity
+      showCartMessage("success", `${selectedQuantity} item(s) added to cart!`);
+
+      // Update cart count in navigation
+      await updateCartCountDisplay();
+
+      console.log("Item added to cart successfully");
+    } else {
+      // Show error message
+      showCartMessage("error", data.message || "Failed to add item to cart");
+    }
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    showCartMessage("error", "Failed to add item to cart. Please try again.");
+  } finally {
+    // Re-enable button
+    if (addToCartBtn) {
+      addToCartBtn.disabled = currentProduct?.product_qty === 0;
+      addToCartBtn.textContent =
+        currentProduct?.product_qty === 0 ? "Out of Stock" : "Add to Cart";
+    }
+  }
+}
+
+// Update cart count display
+async function updateCartCountDisplay() {
+  try {
+    const response = await fetch("/get-cart/count", {
+      credentials: "include",
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      const cartCount = data.data.itemCount || 0;
+      const cartCountEl = document.getElementById("nav-cart-count");
+      if (cartCountEl) {
+        cartCountEl.textContent = cartCount;
+      }
+    }
+  } catch (error) {
+    console.error("Error updating cart count:", error);
+  }
 }
 
 // Initialize quantity when product loads
@@ -505,4 +566,24 @@ function initializeQuantity() {
     quantityInput.value = 1;
   }
   updateQuantityButtons();
+}
+
+// Helper function to show cart messages
+function showCartMessage(type, message) {
+  // Create message element
+  const messageEl = document.createElement("div");
+  messageEl.className = `cart-message ${type}`;
+  messageEl.innerHTML = `
+    <span>${message}</span>
+    <button onclick="this.parentElement.remove()">&times;</button>
+  `;
+
+  document.body.appendChild(messageEl);
+
+  // Auto remove after 4 seconds
+  setTimeout(() => {
+    if (messageEl.parentElement) {
+      messageEl.remove();
+    }
+  }, 4000);
 }

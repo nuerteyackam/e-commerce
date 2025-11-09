@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout - GameVault</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <h2><a href="/">GameVault</a></h2>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/all-products" class="nav-link">Products</a>
+        <a href="/cart" class="nav-link">
+          Cart (<span class="cart-count" id="nav-cart-count">0</span>)
+        </a>
+        <span class="nav-user" id="nav-user-name">Guest</span>
+        <a href="/pages/login.html" class="nav-link" id="nav-login">Login</a>
+        <button
+          id="nav-logout-btn"
+          class="nav-logout-btn"
+          style="display: none"
+        >
+          Logout
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="checkout-header">
+        <h1>Checkout</h1>
+      </div>
+
+      <!-- Checkout Container -->
+      <div id="checkoutContainer">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>Processing your order...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="payment-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Simulate Payment</h3>
+        </div>
+        <div class="modal-body">
+          <p>
+            Order Total:
+            <span id="modalOrderTotal" class="modal-amount">$0.00</span>
+          </p>
+          <p>Order Reference: <strong id="modalOrderRef">-</strong></p>
+          <p>This is a simulated payment process.</p>
+          <p>Click "Yes, I've Paid" to complete your order.</p>
+        </div>
+        <div class="modal-actions">
+          <button id="cancelPaymentBtn" class="btn-secondary">Cancel</button>
+          <button id="confirmPaymentBtn" class="btn-primary">
+            Yes, I've Paid
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/JS/core.js"></script>
+    <script src="/JS/checkout.js"></script>
+  </body>
+</html>

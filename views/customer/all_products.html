@@ -15,6 +15,9 @@
       <div class="nav-links">
         <a href="/" class="nav-link">Home</a>
         <a href="/all-products" class="nav-link">All Products</a>
+        <a href="/cart" class="nav-link">
+          Cart (<span class="cart-count" id="nav-cart-count">0</span>)
+        </a>
         <a href=""></a>
         <a href="/pages/login.html" class="nav-link">Login</a>
         <a href="/pages/register.html" class="nav-link">Register</a>
@@ -98,5 +101,30 @@
     <!-- Scripts -->
     <script src="/JS/core.js"></script>
     <script src="/JS/products.js"></script>
+
+    <script>
+      // Update cart count when page loads
+      async function updateCartCountDisplay() {
+        try {
+          const response = await fetch("/get-cart/count", {
+            credentials: "include",
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            const cartCount = data.data.itemCount || 0;
+            const cartCountEl = document.getElementById("nav-cart-count");
+            if (cartCountEl) {
+              cartCountEl.textContent = cartCount;
+            }
+          }
+        } catch (error) {
+          console.error("Error updating cart count:", error);
+        }
+      }
+
+      // Update cart count on page load
+      document.addEventListener("DOMContentLoaded", updateCartCountDisplay);
+    </script>
   </body>
 </html>

@@ -126,3 +126,39 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS product_qty INT DEFAULT 0;
 
 -- Increase product_image column size to handle JSON
 ALTER TABLE products ALTER COLUMN product_image TYPE TEXT;
+
+
+-- Updated cart table schema
+ALTER TABLE cart DROP COLUMN IF EXISTS ip_add;
+ALTER TABLE cart ADD COLUMN session_id VARCHAR(255);
+ALTER TABLE cart ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE cart ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Add index for performance
+CREATE INDEX IF NOT EXISTS idx_cart_session ON cart (session_id);
+CREATE INDEX IF NOT EXISTS idx_cart_customer ON cart (c_id);
+
+-- Add composite primary key or unique constraint
+ALTER TABLE cart ADD CONSTRAINT unique_cart_item 
+    UNIQUE (session_id, c_id, p_id);
+
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_reference VARCHAR(50) UNIQUE;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_total DECIMAL(10,2) NOT NULL DEFAULT 0;
+
+-- Add missing columns to orderdetails table  
+ALTER TABLE orderdetails ADD COLUMN IF NOT EXISTS price DECIMAL(10,2) NOT NULL DEFAULT 0;
+
+-- Update payment table
+ALTER TABLE payment ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'completed';
+ALTER TABLE payment ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'simulated';
+
+ALTER TABLE orders ALTER COLUMN invoice_no DROP NOT NULL;
+
+-- Add updated_at column to products table
+ALTER TABLE products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Update existing products to have current timestamp
+UPDATE products 
+SET updated_at = CURRENT_TIMESTAMP 
+WHERE updated_at IS NULL;

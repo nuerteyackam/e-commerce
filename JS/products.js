@@ -33,6 +33,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Load products
   await loadProducts();
 
+  // Load cart count
+  await loadCartCount();
+
   console.log("Customer products page initialized");
 });
 
@@ -441,8 +444,86 @@ function showError(message) {
   }
 }
 
-// Placeholder function for add to cart (to be implemented later)
-function addToCart(productId) {
-  alert(`Add to Cart functionality coming soon! Product ID: ${productId}`);
-  console.log("Adding product to cart:", productId);
+// Add product to cart
+async function addToCart(productId) {
+  try {
+    console.log("Adding product to cart:", productId);
+
+    const response = await fetch("/add-to-cart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        productId: productId,
+        quantity: 1,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Show success message
+      showCartMessage("success", "Item added to cart!");
+
+      // Update cart count in navigation (if you have one)
+      updateCartCount(data.cartCount);
+
+      console.log("Item added to cart successfully");
+    } else {
+      // Show error message
+      showCartMessage("error", data.message || "Failed to add item to cart");
+    }
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    showCartMessage("error", "Failed to add item to cart. Please try again.");
+  }
+}
+
+// Load cart count on page load
+async function loadCartCount() {
+  try {
+    const response = await fetch("/get-cart/count", {
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      updateCartCount(data.data.totalQuantity);
+    }
+  } catch (error) {
+    console.error("Error loading cart count:", error);
+  }
+}
+
+// Helper function to update cart count in navigation
+function updateCartCount(count) {
+  const cartCountElements = document.querySelectorAll(
+    ".cart-count, #cart-count, .nav-cart-count"
+  );
+  cartCountElements.forEach((element) => {
+    element.textContent = count || 0;
+  });
+}
+
+// Helper function to show cart messages
+function showCartMessage(type, message) {
+  // Create message element
+  const messageEl = document.createElement("div");
+  messageEl.className = `cart-message ${type}`;
+  messageEl.innerHTML = `
+    <span>${message}</span>
+    <button onclick="this.parentElement.remove()">&times;</button>
+  `;
+
+  document.body.appendChild(messageEl);
+
+  // Auto remove after 4 seconds
+  setTimeout(() => {
+    if (messageEl.parentElement) {
+      messageEl.remove();
+    }
+  }, 4000);
 }
