@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Orders - GameVault</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <!--Navigation-->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <h2><a href="/">GameVault</a></h2>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/all-products" class="nav-link"> All products</a>
+        <a href="/cart" class="nav-link"
+          >Cart (<span class="cart-count" id="nav-cart-count">0</span>)</a
+        >
+        <a href="/orders" class="nav-link">My Orders</a>
+        <span class="nav-user" id="nav-user-name">Guest</span>
+        <a href="/pages/login.html" class="nav-link" id="nav-login">Login</a>
+        <button
+          id="nav-logout-btn"
+          class="nav-logout-btn"
+          style="display: none"
+        >
+          Logout
+        </button>
+      </div>
+    </nav>
+
+    <!--Main Content-->
+    <div class="container">
+      <div class="page-header">
+        <h1>📋 My Orders</h1>
+        <p>Track your order history and status</p>
+      </div>
+
+      <!-- Orders Container -->
+      <div id="ordersContainer">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>Loading your orders...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal" style="display: none">
+      <div class="modal-content order-details-modal">
+        <div class="modal-header">
+          <h3>📦 Order Details</h3>
+          <button class="close-modal" id="closeOrderModal">&times;</button>
+        </div>
+        <div class="modal-body" id="orderDetailsContent">
+          <!-- Order details will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/JS/core.js"></script>
+    <script src="/JS/orders.js"></script>
+  </body>
+</html>

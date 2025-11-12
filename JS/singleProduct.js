@@ -223,14 +223,14 @@ function displayProduct(product) {
                         <label for="quantityInput">Quantity:</label>
                         <button type="button" class="quantity-btn" id="quantityMinusBtn" 
                                 onclick="changeQuantity(-1)">−</button>
-                        <input type="number" id="quantityInput" class="quantity-input" 
+                        <input type="number" id="quantityInput" class="qty-input" 
                                value="1" min="1" max="${product.product_qty}" 
                                onchange="updateQuantity(this.value)">
                         <button type="button" class="quantity-btn" id="quantityPlusBtn" 
                                 onclick="changeQuantity(1)">+</button>
                     </div>
                     
-                    <button type="button" class="btn-add-cart" id="addToCartBtn"
+                    <button type="button" class="btn-cart-single" id="addToCartBtn"
                             ${product.product_qty === 0 ? "disabled" : ""}
                             onclick="addToCart(${product.product_id})">
                         ${

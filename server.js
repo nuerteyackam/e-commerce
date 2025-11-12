@@ -114,7 +114,6 @@ app.use("/get-order-details", getOrderDetailsRouter);
 
 // Serving admin HTML pages
 app.use("/pages", express.static(path.join(dirname, "views")));
-
 // Home page routes
 app.get("/index.html", (req, res) => {
   res.sendFile(path.join(dirname, "index.html"));
