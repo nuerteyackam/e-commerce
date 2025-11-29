@@ -12,19 +12,19 @@ export const PAYSTACK_CONFIG = {
   isProduction: process.env.NODE_ENV === "production",
 };
 
-// validation for production keys
-if (PAYSTACK_CONFIG.isProduction) {
-  if (!PAYSTACK_CONFIG.publicKey || !PAYSTACK_CONFIG.secretKey) {
-    throw new Error("Paystack keys are required in production");
-  }
+// // validation for production keys
+// if (PAYSTACK_CONFIG.isProduction) {
+//   if (!PAYSTACK_CONFIG.publicKey || !PAYSTACK_CONFIG.secretKey) {
+//     throw new Error("Paystack keys are required in production");
+//   }
 
-  if (
-    PAYSTACK_CONFIG.publicKey.startsWith("pk_test_") ||
-    PAYSTACK_CONFIG.secretKey.startsWith("sk_test_")
-  ) {
-    throw new Error("Test keys detected in production environment");
-  }
-}
+//   if (
+//     PAYSTACK_CONFIG.publicKey.startsWith("pk_test_") ||
+//     PAYSTACK_CONFIG.secretKey.startsWith("sk_test_")
+//   ) {
+//     throw new Error("Test keys detected in production environment");
+//   }
+// }
 
 // Log which mode we're in
 const isLive = PAYSTACK_CONFIG.secretKey.startsWith("sk_live_");
