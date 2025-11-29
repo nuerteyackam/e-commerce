@@ -53,9 +53,6 @@ app.use((req, res, next) => {
   res.removeHeader("Cross-Origin-Resource-Policy");
   res.removeHeader("Origin-Agent-Cluster");
 
-  // Explicitly allow HTTP for development
-  res.setHeader("Content-Security-Policy", "upgrade-insecure-requests 0");
-
   // Set cache control for static files
   if (
     req.path.includes(".css") ||
@@ -64,6 +61,8 @@ app.use((req, res, next) => {
     req.path.includes(".webm")
   ) {
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
   }
 
   next();
