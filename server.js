@@ -15,8 +15,17 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://128.199.4.236:5000", "http://localhost:5000"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 200,
+  })
+);
 app.use(bodyParser.json());
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(
@@ -34,6 +43,31 @@ app.use(
     rolling: true,
   })
 );
+
+app.use((req, res, next) => {
+  // Prevent HTTPS upgrades
+  res.setHeader("Strict-Transport-Security", "max-age=0");
+
+  // Remove problematic headers that cause SSL errors
+  res.removeHeader("Cross-Origin-Opener-Policy");
+  res.removeHeader("Cross-Origin-Resource-Policy");
+  res.removeHeader("Origin-Agent-Cluster");
+
+  // Explicitly allow HTTP for development
+  res.setHeader("Content-Security-Policy", "upgrade-insecure-requests 0");
+
+  // Set cache control for static files
+  if (
+    req.path.includes(".css") ||
+    req.path.includes(".js") ||
+    req.path.includes(".mp4") ||
+    req.path.includes(".webm")
+  ) {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  }
+
+  next();
+});
 
 app.use((req, res, next) => {
   // Only log session info for auth and checkout routes
