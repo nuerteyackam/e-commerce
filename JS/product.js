@@ -262,7 +262,7 @@ function renderProducts(organized) {
           ${imageCarousel}
           <div class="product-info">
             <div class="product-title">${product.product_title}</div>
-            <div class="product-price">$${parseFloat(
+            <div class="product-price">₵${parseFloat(
               product.product_price
             ).toFixed(2)}</div>
             <div class="product-stock${stockClass}">${stockText}</div>

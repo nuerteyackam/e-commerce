@@ -304,8 +304,6 @@ class Product {
     }
   }
 
-
-
   // View all products with pagination
   static async viewAllProducts(page = 1, limit = 10) {
     try {
@@ -648,6 +646,48 @@ class Product {
     } catch (error) {
       console.error("Database error:", error);
       throw error;
+    }
+  }
+
+  static async getFeaturedProducts(limit = 1) {
+    try {
+      console.log("--- FET FEATURED PRODUCT BY FLAG");
+
+      const query = `
+            SELECT 
+        p.product_id,
+        p.product_title,
+        p.product_price,
+        p.product_desc,
+        p.product_image,
+        p.product_keywords,
+        p.product_qty as stock_qty,
+        p.created_at,
+        c.cat_id,
+        c.cat_name as category_name,
+        b.brand_id,
+        b.brand_name
+      FROM products p
+      JOIN categories c ON p.product_cat = c.cat_id
+      JOIN brands b ON p.product_brand = b.brand_id
+      WHERE p.product_qty > 0 AND p.is_featured = true
+      ORDER BY p.created_at DESC
+      LIMIT $1
+      `;
+
+      const result = await pool.query(query, [parseInt(limit)]);
+
+      return {
+        products: result.rows,
+        count: result.rows.length,
+      };
+    } catch (error) {
+      console.error("Database Error in getFeaturedProducts:", error);
+
+      return {
+        products: [],
+        count: 0,
+      };
     }
   }
 }

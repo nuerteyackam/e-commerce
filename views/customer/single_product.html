@@ -10,7 +10,7 @@
     <!-- Navigation -->
     <nav class="top-nav">
       <div class="nav-brand">
-        <h2><a href="/">GameVault</a></h2>
+        <h2><a href="/">🎮 GameVault</a></h2>
       </div>
       <div class="nav-links">
         <a href="/" class="nav-link">Home</a>
@@ -19,9 +19,7 @@
           Cart (<span class="cart-count" id="nav-cart-count">0</span>)
         </a>
         <a href="/orders" class="nav-link">My Orders</a>
-        <a href=""></a>
-        <a href="/pages/login.html" class="nav-link">Login</a>
-        <a href="/pages/register.html" class="nav-link">Register</a>
+        <span id="userInfo">Loading...</span>
       </div>
     </nav>
 
@@ -38,12 +36,190 @@
           <p>Loading product details...</p>
         </div>
       </div>
+
+      <!-- Reviews Section -->
+      <div class="reviews-section" id="reviewsSection">
+        <!-- Reviews Header with Overall Rating -->
+        <div class="reviews-header">
+          <h2 class="reviews-title">Customer Reviews</h2>
+          <div class="overall-rating" id="overallRating">
+            <div class="rating-summary">
+              <div class="rating-stars" id="overallStars">
+                <span class="stars-display">☆☆☆☆☆</span>
+              </div>
+              <div class="rating-details">
+                <span class="rating-average" id="ratingAverage">0.0</span>
+                <span class="rating-text">out of 5</span>
+              </div>
+              <div class="rating-count">
+                <span id="totalReviews">0 reviews</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating Statistics -->
+        <div class="reviews-stats" id="reviewsStats">
+          <div class="rating-breakdown">
+            <div class="rating-bar">
+              <span class="star-label">5 ⭐</span>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-5"></div>
+              </div>
+              <span class="star-count" id="count-5">0</span>
+            </div>
+            <div class="rating-bar">
+              <span class="star-label">4 ⭐</span>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-4"></div>
+              </div>
+              <span class="star-count" id="count-4">0</span>
+            </div>
+            <div class="rating-bar">
+              <span class="star-label">3 ⭐</span>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-3"></div>
+              </div>
+              <span class="star-count" id="count-3">0</span>
+            </div>
+            <div class="rating-bar">
+              <span class="star-label">2 ⭐</span>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-2"></div>
+              </div>
+              <span class="star-count" id="count-2">0</span>
+            </div>
+            <div class="rating-bar">
+              <span class="star-label">1 ⭐</span>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-1"></div>
+              </div>
+              <span class="star-count" id="count-1">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Write Review Section -->
+        <div class="write-review-section" id="writeReviewSection">
+          <!-- Review Button (shown when not logged in or haven't reviewed) -->
+          <div class="review-prompt" id="reviewPrompt">
+            <button class="btn-primary" id="writeReviewBtn" onclick="showReviewForm()">
+              ✍️ Write a Review
+            </button>
+            <p class="review-encourage">Share your experience with other gamers!</p>
+          </div>
+
+          <!-- Review Form (hidden by default) -->
+          <div class="review-form" id="reviewForm" style="display: none;">
+            <h3>Write Your Review</h3>
+            <form id="submitReviewForm">
+              <div class="form-group">
+                <label for="reviewRating">Rating *</label>
+                <div class="star-rating-input" id="starRatingInput">
+                  <span class="star" data-rating="1">⭐</span>
+                  <span class="star" data-rating="2">⭐</span>
+                  <span class="star" data-rating="3">⭐</span>
+                  <span class="star" data-rating="4">⭐</span>
+                  <span class="star" data-rating="5">⭐</span>
+                </div>
+                <input type="hidden" id="selectedRating" name="rating" required>
+              </div>
+
+              <div class="form-group">
+                <label for="reviewTitle">Review Title *</label>
+                <input 
+                  type="text" 
+                  id="reviewTitle" 
+                  name="review_title" 
+                  required 
+                  maxlength="200"
+                  placeholder="Summarize your review in a few words..."
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="reviewText">Review Details</label>
+                <textarea 
+                  id="reviewText" 
+                  name="review_text" 
+                  rows="4"
+                  maxlength="1000"
+                  placeholder="Tell other gamers about your experience with this product..."
+                ></textarea>
+                <small class="char-count">0 / 1000 characters</small>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                  📝 Submit Review
+                </button>
+                <button type="button" class="btn-secondary" onclick="hideReviewForm()">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Existing Review Display (for customers who already reviewed) -->
+          <div class="existing-review" id="existingReview" style="display: none;">
+            <h3>Your Review</h3>
+            <div class="review-card user-review" id="userReviewCard">
+              <!-- User's existing review will be displayed here -->
+            </div>
+            <div class="review-actions">
+              <button class="btn-secondary" onclick="editExistingReview()">
+                ✏️ Edit Review
+              </button>
+              <button class="btn-danger" onclick="deleteExistingReview()">
+                🗑️ Delete Review
+              </button>
+            </div>
+          </div>
+
+          <!-- Login Prompt (for non-logged users) -->
+          <div class="login-prompt" id="loginPrompt" style="display: none;">
+            <p>
+              <a href="/pages/login.html" class="login-link">Log in</a> to write a review
+            </p>
+          </div>
+        </div>
+
+        <!-- Reviews List -->
+        <div class="reviews-list" id="reviewsList">
+          <div class="reviews-loading" id="reviewsLoading">
+            <p>Loading reviews...</p>
+          </div>
+          
+          <div class="reviews-container" id="reviewsContainer">
+            <!-- Individual reviews will be populated here -->
+          </div>
+
+          <div class="no-reviews" id="noReviews" style="display: none;">
+            <div class="no-reviews-content">
+              <h3>No Reviews Yet</h3>
+              <p>Be the first to review this product!</p>
+              <button class="btn-primary" onclick="showReviewForm()">
+                ⭐ Write First Review
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Image Modal -->
     <div class="image-modal" id="imageModal">
       <span class="modal-close" id="modalClose">&times;</span>
       <img class="modal-image" id="modalImage" src="" alt="" />
+    </div>
+
+    <!-- Success/Error Messages Modal -->
+    <div class="message-modal" id="messageModal" style="display: none;">
+      <div class="message-content">
+        <span class="message-close" onclick="closeMessageModal()">&times;</span>
+        <div class="message-icon" id="messageIcon"></div>
+        <div class="message-text" id="messageText"></div>
+      </div>
     </div>
 
     <!-- Scripts -->

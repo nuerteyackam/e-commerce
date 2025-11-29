@@ -5,18 +5,28 @@ const router = express.Router();
 
 /**
  * Get cart items
- * GET /api/cart
+ * GET /get-cart
  */
 router.get("/", async (req, res) => {
   try {
     // Get cart identifier from middleware
     const { sessionId, customerId } = req.cartIdentifier;
 
-    // Call controller method
+    // Get cart items from controller (already includes cartCount)
     const result = await cartController.getUserCartCtr(sessionId, customerId);
 
     if (result.success) {
-      res.status(200).json(result);
+      // Add itemCount as an alias for cartCount for consistency
+      res.status(200).json({
+        success: true,
+        message: result.message,
+        data: {
+          items: result.data.items,
+          totals: result.data.totals,
+          cartCount: result.data.cartCount, // Already provided by controller
+          itemCount: result.data.cartCount, // Add as alias
+        },
+      });
     } else {
       res.status(400).json(result);
     }
@@ -31,7 +41,7 @@ router.get("/", async (req, res) => {
 
 /**
  * Get cart count only (for navigation)
- * GET /api/cart/count
+ * GET /get-cart/count
  */
 router.get("/count", async (req, res) => {
   try {
@@ -44,7 +54,11 @@ router.get("/count", async (req, res) => {
     if (result.success) {
       res.status(200).json(result);
     } else {
-      res.status(400).json(result);
+      res.status(400).json({
+        success: false,
+        message: "Failed to get cart count",
+        data: { totalQuantity: 0, itemCount: 0 },
+      });
     }
   } catch (error) {
     console.error("Get cart count action error:", error);

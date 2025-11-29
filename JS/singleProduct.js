@@ -6,6 +6,12 @@ let currentImageIndex = 0;
 let productImages = [];
 let selectedQuantity = 1;
 
+// Review-related global variables
+let currentProductReviews = [];
+let currentProductStats = null;
+let userExistingReview = null;
+let selectedReviewRating = 0;
+
 // DOM elements
 let productContent, breadcrumb, imageModal, modalImage, modalClose;
 let mainImage, thumbnailContainer, quantityInput, addToCartBtn;
@@ -92,6 +98,9 @@ async function loadProduct(productId) {
       currentProduct = data.product;
       displayProduct(data.product);
       updateBreadcrumb(data.product);
+
+      // Initialize reviews after product loads
+      await Promise.all([initializeReviews(productId), updateUserInfo()]);
     } else {
       showError(data.message || "Product not found");
     }
@@ -185,7 +194,7 @@ function displayProduct(product) {
                 
                 <h1 class="product-title">${product.product_title}</h1>
                 
-                <div class="product-price">$${parseFloat(
+                <div class="product-price">₵${parseFloat(
                   product.product_price
                 ).toFixed(2)}</div>
                 
@@ -447,7 +456,7 @@ function createRelatedProductCard(product) {
                 <div class="product-category">${product.cat_name}</div>
                 <div class="product-title">${product.product_title}</div>
                 <div class="product-brand">${product.brand_name}</div>
-                <div class="product-price">$${parseFloat(
+                <div class="product-price">₵${parseFloat(
                   product.product_price
                 ).toFixed(2)}</div>
                 <div class="product-actions">
@@ -586,4 +595,706 @@ function showCartMessage(type, message) {
       messageEl.remove();
     }
   }, 4000);
+}
+
+// Initialize reviews when product loads
+async function initializeReviews(productId) {
+  console.log(`Initializing reviews for product ${productId}...`);
+
+  try {
+    // Load product reviews and check user's review status
+    await Promise.all([
+      loadProductReviews(productId),
+      checkUserExistingReview(productId),
+    ]);
+
+    setupReviewEventListeners();
+  } catch (error) {
+    console.error("Error initializing reviews:", error);
+  }
+}
+
+// Load product reviews and statistics
+async function loadProductReviews(productId) {
+  try {
+    console.log(`Loading reviews for product ${productId}...`);
+
+    const response = await fetch(`/reviews/product/${productId}`);
+    const data = await response.json();
+
+    if (data.success) {
+      currentProductReviews = data.data.reviews || [];
+      currentProductStats = data.data.stats || {};
+
+      console.log("Reviews loaded:", currentProductReviews.length);
+      console.log("Stats:", currentProductStats);
+
+      displayReviewsOverview();
+      displayReviewsStats();
+      displayReviewsList();
+    } else {
+      console.log("No reviews found for this product");
+      displayNoReviews();
+    }
+  } catch (error) {
+    console.error("Error loading reviews:", error);
+    displayReviewsError();
+  }
+}
+
+// Check user's existing review for this product
+async function checkUserExistingReview(productId) {
+  try {
+    // Use existing core.js function
+    const loggedIn = await isLoggedIn();
+
+    if (!loggedIn) {
+      showLoginPrompt();
+      return;
+    }
+
+    // User is logged in, check for existing review
+    const reviewResponse = await fetch(`/reviews/customer/${productId}`, {
+      credentials: "include",
+    });
+
+    const reviewData = await reviewResponse.json();
+
+    if (reviewData.success && reviewData.data) {
+      // User has already reviewed this product
+      userExistingReview = reviewData.data;
+      showExistingReview();
+    } else {
+      // User hasn't reviewed this product yet
+      userExistingReview = null;
+      showWriteReviewPrompt();
+    }
+  } catch (error) {
+    console.error("Error checking user review:", error);
+    showLoginPrompt();
+  }
+}
+
+// Display reviews overview (rating summary)
+function displayReviewsOverview() {
+  const overallRating = document.getElementById("overallRating");
+  const overallStars = document.getElementById("overallStars");
+  const ratingAverage = document.getElementById("ratingAverage");
+  const totalReviews = document.getElementById("totalReviews");
+
+  if (currentProductStats && currentProductStats.total_reviews > 0) {
+    const avgRating = parseFloat(currentProductStats.average_rating) || 0;
+    const totalCount = parseInt(currentProductStats.total_reviews) || 0;
+
+    // Display star rating
+    if (overallStars) {
+      overallStars.innerHTML = generateStarDisplay(avgRating);
+    }
+
+    // Display average rating
+    if (ratingAverage) {
+      ratingAverage.textContent = avgRating.toFixed(1);
+    }
+
+    // Display total reviews
+    if (totalReviews) {
+      totalReviews.textContent = `${totalCount} review${
+        totalCount !== 1 ? "s" : ""
+      }`;
+    }
+  } else {
+    // No reviews yet
+    if (overallStars) {
+      overallStars.innerHTML = generateStarDisplay(0);
+    }
+    if (ratingAverage) {
+      ratingAverage.textContent = "0.0";
+    }
+    if (totalReviews) {
+      totalReviews.textContent = "No reviews yet";
+    }
+  }
+}
+
+// Display rating statistics (breakdown)
+function displayReviewsStats() {
+  if (!currentProductStats || currentProductStats.total_reviews === 0) {
+    // Hide stats section if no reviews
+    const statsSection = document.getElementById("reviewsStats");
+    if (statsSection) {
+      statsSection.style.display = "none";
+    }
+    return;
+  }
+
+  const totalReviews = parseInt(currentProductStats.total_reviews);
+  const stats = {
+    5: parseInt(currentProductStats.five_star) || 0,
+    4: parseInt(currentProductStats.four_star) || 0,
+    3: parseInt(currentProductStats.three_star) || 0,
+    2: parseInt(currentProductStats.two_star) || 0,
+    1: parseInt(currentProductStats.one_star) || 0,
+  };
+
+  // Update each rating bar
+  for (let rating = 1; rating <= 5; rating++) {
+    const count = stats[rating];
+    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+
+    const progressBar = document.getElementById(`progress-${rating}`);
+    const countElement = document.getElementById(`count-${rating}`);
+
+    if (progressBar) {
+      progressBar.style.width = `${percentage}%`;
+    }
+
+    if (countElement) {
+      countElement.textContent = count;
+    }
+  }
+
+  // Show stats section
+  const statsSection = document.getElementById("reviewsStats");
+  if (statsSection) {
+    statsSection.style.display = "block";
+  }
+}
+
+// Display list of individual reviews
+function displayReviewsList() {
+  const reviewsContainer = document.getElementById("reviewsContainer");
+  const reviewsLoading = document.getElementById("reviewsLoading");
+  const noReviews = document.getElementById("noReviews");
+
+  // Hide loading
+  if (reviewsLoading) {
+    reviewsLoading.style.display = "none";
+  }
+
+  if (!currentProductReviews || currentProductReviews.length === 0) {
+    if (noReviews) {
+      noReviews.style.display = "block";
+    }
+    if (reviewsContainer) {
+      reviewsContainer.innerHTML = "";
+    }
+    return;
+  }
+
+  // Hide no reviews message
+  if (noReviews) {
+    noReviews.style.display = "none";
+  }
+
+  // Generate reviews HTML
+  const reviewsHTML = currentProductReviews
+    .map((review) => {
+      const reviewDate = new Date(review.created_at).toLocaleDateString();
+      const customerName = review.customer_name || "Anonymous";
+
+      return `
+      <div class="review-card">
+        <div class="review-header">
+          <div class="reviewer-info">
+            <div class="reviewer-name">${customerName}</div>
+            <div class="review-date">${reviewDate}</div>
+            ${
+              review.is_verified_purchase
+                ? '<span class="verified-badge">✓ Verified Purchase</span>'
+                : ""
+            }
+          </div>
+          <div class="review-rating">
+            ${generateStarDisplay(review.rating)}
+          </div>
+        </div>
+        
+        <div class="review-content">
+          <h4 class="review-title">${review.review_title}</h4>
+          ${
+            review.review_text
+              ? `<p class="review-text">${review.review_text}</p>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  if (reviewsContainer) {
+    reviewsContainer.innerHTML = reviewsHTML;
+  }
+}
+
+// Generate star display HTML
+function generateStarDisplay(rating) {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  let starsHTML = "";
+
+  // Full stars
+  for (let i = 0; i < fullStars; i++) {
+    starsHTML += "⭐";
+  }
+
+  // Half star
+  if (hasHalfStar) {
+    starsHTML += "⯪";
+  }
+
+  // Empty stars
+  for (let i = 0; i < emptyStars; i++) {
+    starsHTML += "☆";
+  }
+
+  return `<span class="stars-display">${starsHTML}</span>`;
+}
+
+// Show login prompt
+function showLoginPrompt() {
+  const writeReviewSection = document.getElementById("writeReviewSection");
+  const reviewPrompt = document.getElementById("reviewPrompt");
+  const loginPrompt = document.getElementById("loginPrompt");
+
+  if (reviewPrompt) reviewPrompt.style.display = "none";
+  if (loginPrompt) loginPrompt.style.display = "block";
+}
+
+// Show write review prompt
+function showWriteReviewPrompt() {
+  const reviewPrompt = document.getElementById("reviewPrompt");
+  const loginPrompt = document.getElementById("loginPrompt");
+  const existingReview = document.getElementById("existingReview");
+
+  if (reviewPrompt) reviewPrompt.style.display = "block";
+  if (loginPrompt) loginPrompt.style.display = "none";
+  if (existingReview) existingReview.style.display = "none";
+}
+
+// Show existing review
+function showExistingReview() {
+  const reviewPrompt = document.getElementById("reviewPrompt");
+  const loginPrompt = document.getElementById("loginPrompt");
+  const existingReview = document.getElementById("existingReview");
+  const userReviewCard = document.getElementById("userReviewCard");
+
+  if (reviewPrompt) reviewPrompt.style.display = "none";
+  if (loginPrompt) loginPrompt.style.display = "none";
+  if (existingReview) existingReview.style.display = "block";
+
+  if (userExistingReview && userReviewCard) {
+    const reviewDate = new Date(
+      userExistingReview.created_at
+    ).toLocaleDateString();
+
+    userReviewCard.innerHTML = `
+      <div class="review-header">
+        <div class="review-rating">
+          ${generateStarDisplay(userExistingReview.rating)}
+        </div>
+        <div class="review-date">${reviewDate}</div>
+      </div>
+      <div class="review-content">
+        <h4 class="review-title">${userExistingReview.review_title}</h4>
+        ${
+          userExistingReview.review_text
+            ? `<p class="review-text">${userExistingReview.review_text}</p>`
+            : ""
+        }
+      </div>
+    `;
+  }
+}
+
+// Setup review event listeners
+function setupReviewEventListeners() {
+  // Star rating input
+  const starInputs = document.querySelectorAll("#starRatingInput .star");
+  starInputs.forEach((star, index) => {
+    star.addEventListener("click", () => selectRating(index + 1));
+    star.addEventListener("mouseenter", () => highlightStars(index + 1));
+  });
+
+  // Star rating container mouse leave
+  const starContainer = document.getElementById("starRatingInput");
+  if (starContainer) {
+    starContainer.addEventListener("mouseleave", () =>
+      highlightStars(selectedReviewRating)
+    );
+  }
+
+  // Review form submission
+  const reviewForm = document.getElementById("submitReviewForm");
+  if (reviewForm) {
+    reviewForm.addEventListener("submit", submitReview);
+  }
+
+  // Character counter for review text
+  const reviewText = document.getElementById("reviewText");
+  if (reviewText) {
+    reviewText.addEventListener("input", updateCharacterCount);
+  }
+}
+
+// Select rating
+function selectRating(rating) {
+  selectedReviewRating = rating;
+  document.getElementById("selectedRating").value = rating;
+  highlightStars(rating);
+}
+
+// Highlight stars
+function highlightStars(count) {
+  const stars = document.querySelectorAll("#starRatingInput .star");
+  stars.forEach((star, index) => {
+    if (index < count) {
+      star.style.color = "#ffd700"; // Gold color for selected
+      star.style.filter = "none";
+    } else {
+      star.style.color = "#ddd"; // Gray color for unselected
+      star.style.filter = "grayscale(100%)";
+    }
+  });
+}
+
+// Show review form
+function showReviewForm() {
+  const reviewPrompt = document.getElementById("reviewPrompt");
+  const reviewForm = document.getElementById("reviewForm");
+
+  if (reviewPrompt) reviewPrompt.style.display = "none";
+  if (reviewForm) reviewForm.style.display = "block";
+
+  // Reset form
+  resetReviewForm();
+}
+
+// Hide review form
+function hideReviewForm() {
+  const reviewPrompt = document.getElementById("reviewPrompt");
+  const reviewForm = document.getElementById("reviewForm");
+
+  if (reviewPrompt) reviewPrompt.style.display = "block";
+  if (reviewForm) reviewForm.style.display = "none";
+
+  // Reset form
+  resetReviewForm();
+}
+
+// Reset review form
+function resetReviewForm() {
+  selectedReviewRating = 0;
+  document.getElementById("selectedRating").value = "";
+  document.getElementById("reviewTitle").value = "";
+  document.getElementById("reviewText").value = "";
+  highlightStars(0);
+  updateCharacterCount();
+}
+
+// Update character count
+function updateCharacterCount() {
+  const reviewText = document.getElementById("reviewText");
+  const charCount = document.querySelector(".char-count");
+
+  if (reviewText && charCount) {
+    const currentLength = reviewText.value.length;
+    charCount.textContent = `${currentLength} / 1000 characters`;
+  }
+}
+
+// Submit review
+// Submit review
+async function submitReview(event) {
+  event.preventDefault();
+
+  const productId = getProductIdFromUrl();
+  if (!productId) {
+    showMessageModal("error", "Invalid product ID");
+    return;
+  }
+
+  // Get form data
+  const rating = selectedReviewRating;
+  const title = document.getElementById("reviewTitle").value.trim();
+  const text = document.getElementById("reviewText").value.trim();
+
+  // Validation
+  if (!rating || rating < 1 || rating > 5) {
+    showMessageModal("error", "Please select a rating");
+    return;
+  }
+
+  if (!title) {
+    showMessageModal("error", "Please enter a review title");
+    return;
+  }
+
+  try {
+    // Show loading state
+    const submitBtn = document.querySelector(
+      '#submitReviewForm button[type="submit"]'
+    );
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+    }
+
+    let response, data;
+
+    if (userExistingReview && userExistingReview.review_id) {
+      console.log("Updating existing review:", userExistingReview.review_id);
+
+      // UPDATE existing review
+      response = await fetch(`/reviews/${userExistingReview.review_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          rating: rating,
+          review_title: title,
+          review_text: text,
+        }),
+      });
+    } else {
+      console.log("Adding new review for product:", productId);
+
+      // ADD new review
+      response = await fetch("/reviews/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          product_id: productId,
+          rating: rating,
+          review_title: title,
+          review_text: text,
+        }),
+      });
+    }
+
+    data = await response.json();
+
+    if (data.success) {
+      const message = userExistingReview
+        ? "Review updated successfully!"
+        : "Review submitted successfully!";
+      showMessageModal("success", message);
+
+      // Hide form and refresh reviews
+      hideReviewForm();
+      await loadProductReviews(productId);
+      await checkUserExistingReview(productId);
+    } else {
+      showMessageModal("error", data.message || "Failed to submit review");
+    }
+  } catch (error) {
+    console.error("Error submitting review:", error);
+    showMessageModal("error", "Failed to submit review. Please try again.");
+  } finally {
+    // Reset submit button
+    const submitBtn = document.querySelector(
+      '#submitReviewForm button[type="submit"]'
+    );
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "📝 Submit Review";
+    }
+  }
+}
+
+// Edit existing review
+function editExistingReview() {
+  // Pre-fill form with existing data
+  if (userExistingReview) {
+    selectedReviewRating = userExistingReview.rating;
+    document.getElementById("selectedRating").value = userExistingReview.rating;
+    document.getElementById("reviewTitle").value =
+      userExistingReview.review_title;
+    document.getElementById("reviewText").value =
+      userExistingReview.review_text || "";
+    highlightStars(userExistingReview.rating);
+    updateCharacterCount();
+  }
+
+  // Show form
+  const existingReview = document.getElementById("existingReview");
+  const reviewForm = document.getElementById("reviewForm");
+
+  if (existingReview) existingReview.style.display = "none";
+  if (reviewForm) reviewForm.style.display = "block";
+
+  // Change submit button text
+  const submitBtn = document.querySelector(
+    '#submitReviewForm button[type="submit"]'
+  );
+  if (submitBtn) {
+    submitBtn.textContent = "✏️ Update Review";
+  }
+}
+
+// Delete existing review
+async function deleteExistingReview() {
+  if (
+    !userExistingReview ||
+    !confirm("Are you sure you want to delete your review?")
+  ) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/reviews/${userExistingReview.review_id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showMessageModal("success", "Review deleted successfully");
+
+      // Refresh reviews and user status
+      const productId = getProductIdFromUrl();
+      await loadProductReviews(productId);
+      await checkUserExistingReview(productId);
+    } else {
+      showMessageModal("error", data.message || "Failed to delete review");
+    }
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    showMessageModal("error", "Failed to delete review. Please try again.");
+  }
+}
+
+// Display no reviews state
+function displayNoReviews() {
+  const reviewsLoading = document.getElementById("reviewsLoading");
+  const noReviews = document.getElementById("noReviews");
+  const reviewsContainer = document.getElementById("reviewsContainer");
+
+  if (reviewsLoading) reviewsLoading.style.display = "none";
+  if (noReviews) noReviews.style.display = "block";
+  if (reviewsContainer) reviewsContainer.innerHTML = "";
+
+  // Hide stats section
+  const statsSection = document.getElementById("reviewsStats");
+  if (statsSection) statsSection.style.display = "none";
+
+  displayReviewsOverview(); // Still show 0.0 rating
+}
+
+// Display reviews error
+function displayReviewsError() {
+  const reviewsLoading = document.getElementById("reviewsLoading");
+  const reviewsContainer = document.getElementById("reviewsContainer");
+
+  if (reviewsLoading) reviewsLoading.style.display = "none";
+
+  if (reviewsContainer) {
+    reviewsContainer.innerHTML = `
+      <div class="reviews-error">
+        <p>Failed to load reviews. Please refresh the page.</p>
+      </div>
+    `;
+  }
+}
+
+// Show message modal
+function showMessageModal(type, message) {
+  const modal = document.getElementById("messageModal");
+  const icon = document.getElementById("messageIcon");
+  const text = document.getElementById("messageText");
+
+  if (!modal || !icon || !text) return;
+
+  // Set icon based on type
+  if (type === "success") {
+    icon.textContent = "✅";
+    icon.style.color = "#10B981";
+  } else if (type === "error") {
+    icon.textContent = "❌";
+    icon.style.color = "#EF4444";
+  }
+
+  text.textContent = message;
+  modal.style.display = "flex";
+
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 3000);
+}
+
+// Close message modal
+function closeMessageModal() {
+  const modal = document.getElementById("messageModal");
+  if (modal) {
+    modal.style.display = "none";
+  }
+}
+
+async function updateUserInfo() {
+  console.log("=== SINGLE PRODUCT USER INFO UPDATE ===");
+
+  const loggedIn = await isLoggedIn();
+  console.log("Is logged in:", loggedIn);
+
+  if (!loggedIn) {
+    console.log("User not logged in, showing login/register links");
+    // Not logged in - show login/register
+    document.getElementById("userInfo").innerHTML =
+      '<a href="/pages/login.html" class="nav-link">Login</a><a href="/pages/register.html" class="nav-link">Register</a>';
+  } else {
+    // User is logged in
+    console.log("User is logged in, getting user data...");
+
+    const response = await getCurrentUser();
+    console.log("getCurrentUser full response:", response);
+
+    const currentUser = response?.data;
+    console.log("Current user from data:", currentUser);
+
+    if (currentUser && currentUser.name) {
+      console.log("User data found, updating UI...");
+
+      // Show user info and logout - same as home.html
+      document.getElementById(
+        "userInfo"
+      ).innerHTML = `<span class="nav-user">Hi, ${currentUser.name}</span><button id="logoutBtn" class="nav-logout-btn">Logout</button>`;
+
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+          try {
+            console.log("Logging out...");
+            const res = await fetch("/logout", { method: "POST" });
+            const data = await res.json();
+            if (data.success) {
+              console.log("Logout successful");
+              window.location.href = "/pages/login.html";
+            } else {
+              console.log("Logout failed:", data);
+              alert("Logout failed. Try again.");
+            }
+          } catch (err) {
+            console.error("Error logging out:", err);
+            alert("Something went wrong.");
+          }
+        });
+      }
+    } else {
+      console.log("No user data found or invalid structure");
+      console.log("Response structure:", response);
+
+      // Fallback - show login/register links
+      document.getElementById("userInfo").innerHTML =
+        '<a href="/pages/login.html" class="nav-link">Login</a><a href="/pages/register.html" class="nav-link">Register</a>';
+    }
+  }
 }

@@ -159,7 +159,7 @@ function createOrderCard(order) {
           </div>
           <div class="order-total">
             <span class="info-label">💰 Total:</span>
-            <span class="info-value">$${parseFloat(order.order_total).toFixed(
+            <span class="info-value">₵${parseFloat(order.order_total).toFixed(
               2
             )}</span>
           </div>
@@ -304,7 +304,7 @@ function displayOrderDetails(orderData) {
         </div>
         <div class="summary-row">
           <span class="label">Total:</span>
-          <span class="value total">$${parseFloat(order.order_total).toFixed(
+          <span class="value total">₵${parseFloat(order.order_total).toFixed(
             2
           )}</span>
         </div>
@@ -319,6 +319,54 @@ function displayOrderDetails(orderData) {
             : ""
         }
       </div>
+
+      ${
+        orderData.timeline && orderData.timeline.length > 0
+          ? `
+      <div class="order-tracking">
+        <h4>📍 Order Tracking</h4>
+        <div class="tracking-timeline">
+          ${orderData.timeline
+            .map(
+              (step) => `
+            <div class="timeline-step ${step.isCompleted ? "completed" : ""} ${
+                step.isCurrent ? "current" : ""
+              }">
+              <div class="step-icon">${step.icon}</div>
+              <div class="step-content">
+                <div class="step-label">${step.label}</div>
+                ${
+                  step.timestamp
+                    ? `<div class="step-time">${new Date(
+                        step.timestamp
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}</div>`
+                    : '<div class="step-time">Pending</div>'
+                }
+              </div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+        ${
+          orderData.order.tracking_notes
+            ? `
+        <div class="tracking-notes">
+          <strong>📝 Tracking Notes:</strong>
+          <p>${orderData.order.tracking_notes}</p>
+        </div>
+        `
+            : ""
+        }
+      </div>
+      `
+          : ""
+      }
 
       <div class="order-items">
         <h4>📦 Order Items (${items.length})</h4>
@@ -348,7 +396,7 @@ function displayOrderDetails(orderData) {
                 item.brand_name
               }</p>
                   <div class="item-pricing">
-                    <span>$${parseFloat(item.price).toFixed(2)} × ${
+                    <span>₵${parseFloat(item.price).toFixed(2)} × ${
                 item.qty
               } = $${itemTotal}</span>
                   </div>
@@ -508,8 +556,8 @@ function showLoginRequired() {
         <h3>Login Required</h3>
         <p>You need to be logged in to view your orders.</p>
         <div class="login-actions">
-          <a href="/login" class="btn-primary">Login</a>
-          <a href="/register" class="btn-secondary">Create Account</a>
+          <a href="/pages/login.html" class="btn-primary">Login</a>
+          <a href="/pages/register.html" class="btn-secondary">Create Account</a>
         </div>
       </div>
     `;

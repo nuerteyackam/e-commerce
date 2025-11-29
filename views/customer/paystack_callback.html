@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Processing - GameVault</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <!--Navigation-->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <a href="/" class="nav-logo">GameVault</a>
+      </div>
+      <div class="nav-menu">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/all-products" class="nav-link">All Products</a>
+        <a href="/cart" class="nav-link"
+          >Cart (<span class="cart-count" id="nav-cart-count">0</span>)</a
+        >
+        <a href="/orders" class="nav-link">My Orders</a>
+      </div>
+    </nav>
+
+    <!--Main Content-->
+    <div class="container">
+      <div class="payment-processing">
+        <div class="processing-spinner"></div>
+        <h2>Processing Your Payment</h2>
+        <div class="processing-status">
+          <p id="statusMessage">
+            Please wait while we verify your payment with Paystack...
+          </p>
+          <div class="processing-steps">
+            <div class="step active" id="step1">🔄 Verifying transaction</div>
+            <div class="step" id="step2">💾 Recording payment</div>
+            <div class="step" id="step3">📦 Confirming order</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error container for payment failures -->
+      <div id="error-container" style="display: none" class="error-message">
+        <h2>Payment Error</h2>
+        <p id="error-message"></p>
+        <div class="error-actions">
+          <button onclick="window.location.href='/cart'" class="btn-secondary">
+            Back to Cart
+          </button>
+          <button onclick="window.location.href='/orders'" class="btn-primary">
+            View Orders
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      console.log("=== PAYSTACK CALLBACK PAGE LOADED ===");
+      console.log("Current URL:", window.location.href);
+
+      // Enhanced status updates for better user experience
+      let stepIndex = 0;
+      const steps = ["step1", "step2", "step3"];
+      const statusMessage = document.getElementById("statusMessage");
+
+      function updateStatus() {
+        // Remove active class from all steps
+        steps.forEach((step) => {
+          document.getElementById(step)?.classList.remove("active");
+        });
+
+        // Add active class to current step
+        if (stepIndex < steps.length) {
+          document.getElementById(steps[stepIndex])?.classList.add("active");
+          stepIndex++;
+
+          // Update main status message
+          const messages = [
+            "Verifying payment with Paystack...",
+            "Recording payment details...",
+            "Confirming your order...",
+          ];
+
+          if (statusMessage && stepIndex <= messages.length) {
+            statusMessage.textContent = messages[stepIndex - 1];
+          }
+        }
+      }
+
+      // Start payment verification immediately
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("DOM loaded, starting payment verification...");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const reference = urlParams.get("reference") || urlParams.get("trxref");
+
+        console.log("Payment reference:", reference);
+
+        if (reference) {
+          // Start status updates
+          const statusInterval = setInterval(updateStatus, 1500);
+
+          // Start payment verification
+          verifyPayment(reference).finally(() => {
+            clearInterval(statusInterval);
+          });
+        } else {
+          showError("No payment reference found");
+        }
+      });
+
+      async function verifyPayment(reference) {
+        try {
+          console.log("Verifying payment with reference:", reference);
+
+          const response = await fetch("/paystack-verify-payment", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ reference }),
+          });
+
+          console.log("Verification response status:", response.status);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Verification data:", data);
+
+          if (data.success) {
+            console.log("Payment verified successfully, redirecting...");
+
+            // Update final status
+            if (statusMessage) {
+              statusMessage.textContent =
+                "Payment verified successfully! Redirecting...";
+            }
+
+            // Build success page parameters
+            const successParams = new URLSearchParams({
+              ref: data.data.orderReference || "N/A",
+              amount: data.data.amount || "0",
+              payment_id: data.data.paymentId || "N/A",
+              invoice: data.data.invoiceNo || "N/A",
+              transaction_ref: data.data.transactionRef || reference,
+              payment_method: data.data.paymentMethod || "Paystack",
+              status: "success",
+            });
+
+            // Redirect to success page after short delay
+            setTimeout(() => {
+              window.location.href = `/payment-success?${successParams.toString()}`;
+            }, 2000);
+          } else {
+            console.error("Payment verification failed:", data.message);
+            showError(data.message || "Payment verification failed");
+          }
+        } catch (error) {
+          console.error("Payment verification error:", error);
+          showError(
+            `Payment verification failed: ${error.message}. Please contact support.`
+          );
+        }
+      }
+
+      function showError(message) {
+        console.log("Showing error:", message);
+
+        // Hide processing UI
+        document.querySelector(".payment-processing").style.display = "none";
+
+        // Show error UI
+        document.getElementById("error-container").style.display = "block";
+        document.getElementById("error-message").textContent = message;
+      }
+    </script>
+
+    <script src="/JS/core.js"></script>
+  </body>
+</html>

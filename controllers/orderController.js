@@ -16,16 +16,29 @@ class OrderController {
    */
   async processCheckoutCtr(sessionId, customerId) {
     try {
+      console.log("🔍 DEBUG: Order controller starting");
+      console.log("🔍 DEBUG: sessionId =", sessionId);
+      console.log("🔍 DEBUG: customerId =", customerId);
+
       // Validate user
       if (!sessionId && !customerId) {
+        console.log("DEBUG: Neither sessionId nor customerId provided");
         throw new Error("Either session ID or customer ID is required");
       }
 
       if (!customerId) {
+        console.log("DEBUG: No customerId provided");
         throw new Error(
           "Only logged-in customers can checkout. Please login first."
         );
       }
+
+      console.log(
+        "🔍 DEBUG: Calling cartModel.getCartItems with sessionId:",
+        sessionId,
+        "customerId:",
+        customerId
+      );
 
       // Get cart items
       const cartResult = await this.cartModel.getCartItems(
@@ -33,29 +46,66 @@ class OrderController {
         customerId
       );
 
+      console.log("🔍 DEBUG: Cart model result:", cartResult);
+      console.log("🔍 DEBUG: Cart success:", cartResult.success);
+      console.log("🔍 DEBUG: Cart message:", cartResult.message);
+      console.log("🔍 DEBUG: Cart data:", cartResult.data);
+
       if (!cartResult.success) {
+        console.log("❌ DEBUG: Cart model failed:", cartResult.message);
         throw new Error(cartResult.message);
       }
 
       const cartItems = cartResult.data.items;
+      console.log("🔍 DEBUG: Cart items:", cartItems);
+      console.log(
+        "🔍 DEBUG: Cart items length:",
+        cartItems ? cartItems.length : "undefined"
+      );
 
       if (!cartItems || cartItems.length === 0) {
+        console.log("❌ DEBUG: Cart items array is empty or undefined");
         throw new Error("Your cart is empty");
       }
+
+      console.log(
+        "✅ DEBUG: Found",
+        cartItems.length,
+        "items in cart, proceeding with validation..."
+      );
 
       // RE-VALIDATE PRODUCT DATA AND PRICES
       const validatedItems = await this.validateAndUpdateCartItems(cartItems);
 
+      console.log("🔍 DEBUG: Validation result:", validatedItems);
+
       if (!validatedItems.success) {
+        console.log(
+          "❌ DEBUG: Item validation failed:",
+          validatedItems.message
+        );
         return validatedItems; // Return validation errors
       }
 
       const updatedCartItems = validatedItems.data.items;
       const actualTotal = validatedItems.data.total;
 
+      console.log(
+        "🔍 DEBUG: Validated cart items:",
+        updatedCartItems.length,
+        "items"
+      );
+      console.log("🔍 DEBUG: Actual total:", actualTotal);
+
       // Validate stock for all cart items (using updated data)
       const stockValidation = await this.validateCartStock(updatedCartItems);
+      console.log("🔍 DEBUG: Stock validation result:", stockValidation);
+
       if (!stockValidation.valid) {
+        console.log(
+          "❌ DEBUG: Stock validation failed:",
+          stockValidation.outOfStockItems
+        );
         return {
           success: false,
           message: "Some items in your cart are out of stock",
@@ -65,8 +115,11 @@ class OrderController {
         };
       }
 
+      console.log("✅ DEBUG: Stock validation passed, creating order...");
+
       // Generate order reference
       const orderReference = this.orderModel.generateOrderReference();
+      console.log("🔍 DEBUG: Generated order reference:", orderReference);
 
       // Create order with ACTUAL current prices
       const orderResult = await this.orderModel.createOrder(
@@ -75,11 +128,15 @@ class OrderController {
         actualTotal
       );
 
+      console.log("🔍 DEBUG: Order creation result:", orderResult);
+
       if (!orderResult.success) {
+        console.log("❌ DEBUG: Order creation failed:", orderResult.message);
         throw new Error(orderResult.message);
       }
 
       const orderId = orderResult.data.orderId;
+      console.log("🔍 DEBUG: Created order with ID:", orderId);
 
       // Add order details with CURRENT product data
       const orderDetailsResult = await this.orderModel.addOrderDetails(
@@ -87,9 +144,14 @@ class OrderController {
         updatedCartItems
       );
 
+      console.log("🔍 DEBUG: Order details result:", orderDetailsResult);
+
       if (!orderDetailsResult.success) {
+        console.log("❌ DEBUG: Order details creation failed");
         throw new Error("Failed to add order details");
       }
+
+      console.log("✅ DEBUG: Order created successfully!");
 
       return {
         success: true,
@@ -104,7 +166,7 @@ class OrderController {
         },
       };
     } catch (error) {
-      console.error("Process checkout controller error:", error);
+      console.error("❌ Process checkout controller error:", error);
       return {
         success: false,
         message: error.message || "Failed to process checkout",
@@ -459,6 +521,348 @@ class OrderController {
       return {
         success: false,
         message: error.message || "Payment processing failed",
+      };
+    }
+  }
+
+  /**
+   * Get customer orders with tracking (pure function)
+   * @param {number} customerId - Customer ID
+   * @param {number} limit - Maximum number of orders
+   * @returns {Object} Orders with tracking data
+   */
+  async getCustomerOrdersWithTrackingCtr(customerId, limit = 50) {
+    try {
+      if (!customerId) {
+        throw new Error("Customer ID is required");
+      }
+
+      console.log(`=== GET CUSTOMER ORDERS WITH TRACKING ===`);
+      console.log(`Customer ID: ${customerId}, Limit: ${limit}`);
+
+      const result = await this.orderModel.getCustomerOrdersWithTracking(
+        customerId,
+        limit
+      );
+
+      if (result.success) {
+        console.log(`Found ${result.data.orders.length} orders with tracking`);
+        return {
+          success: true,
+          data: {
+            orders: result.data.orders,
+            totalOrders: result.data.totalOrders,
+          },
+          message: result.message,
+        };
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error("Error in getCustomerOrdersWithTrackingCtr:", error);
+      return {
+        success: false,
+        message: error.message || "Failed to retrieve orders with tracking",
+      };
+    }
+  }
+
+  /**
+   * Get order details with tracking timeline (pure function)
+   * @param {number} orderId - Order ID
+   * @param {number} customerId - Customer ID for security
+   * @returns {Object} Order details with timeline
+   */
+  async getOrderDetailsWithTrackingCtr(orderId, customerId) {
+    try {
+      if (!orderId || !customerId) {
+        throw new Error("Order ID and customer ID are required");
+      }
+
+      console.log(`=== GET ORDER DETAILS WITH TRACKING ===`);
+      console.log(`Order ID: ${orderId}, Customer ID: ${customerId}`);
+
+      const orderResult = await this.orderModel.getOrderWithTracking(
+        parseInt(orderId),
+        customerId
+      );
+
+      if (!orderResult.success) {
+        throw new Error(orderResult.message);
+      }
+
+      // Generate timeline
+      const timeline = this.orderModel.getOrderStatusTimeline(
+        orderResult.data.order.order_status,
+        orderResult.data.order.order_date,
+        orderResult.data.order.updated_at
+      );
+
+      console.log(
+        `Order ${orderId} status: ${orderResult.data.order.order_status}`
+      );
+
+      return {
+        success: true,
+        data: {
+          order: orderResult.data.order,
+          items: orderResult.data.items,
+          itemCount: orderResult.data.itemCount,
+          timeline: timeline.data || [],
+        },
+        message: "Order details with tracking retrieved successfully",
+      };
+    } catch (error) {
+      console.error("Error in getOrderDetailsWithTrackingCtr:", error);
+      return {
+        success: false,
+        message:
+          error.message || "Failed to retrieve order details with tracking",
+      };
+    }
+  }
+
+  /**
+   * Get order tracking information (pure function)
+   * @param {number} orderId - Order ID
+   * @param {number} customerId - Customer ID for security
+   * @returns {Object} Order tracking data
+   */
+  async getOrderTrackingCtr(orderId, customerId) {
+    try {
+      if (!orderId || !customerId) {
+        throw new Error("Order ID and customer ID are required");
+      }
+
+      console.log(`=== GET ORDER TRACKING ===`);
+      console.log(`Order ID: ${orderId}, Customer ID: ${customerId}`);
+
+      const orderResult = await this.orderModel.getOrderWithTracking(
+        parseInt(orderId),
+        customerId
+      );
+
+      if (!orderResult.success) {
+        throw new Error(orderResult.message);
+      }
+
+      // Generate timeline
+      const timeline = this.orderModel.getOrderStatusTimeline(
+        orderResult.data.order.order_status,
+        orderResult.data.order.order_date,
+        orderResult.data.order.updated_at
+      );
+
+      return {
+        success: true,
+        data: {
+          order: orderResult.data.order,
+          timeline: timeline.data || [],
+          trackingNotes: orderResult.data.order.tracking_notes,
+        },
+        message: "Order tracking retrieved successfully",
+      };
+    } catch (error) {
+      console.error("Error in getOrderTrackingCtr:", error);
+      return {
+        success: false,
+        message: error.message || "Failed to retrieve order tracking",
+      };
+    }
+  }
+
+  /**
+   * Get order receipt data (pure function)
+   * @param {number} orderId - Order ID
+   * @param {number} customerId - Customer ID for security
+   * @returns {Object} Order receipt data
+   */
+  async downloadReceiptCtr(orderId, customerId) {
+    try {
+      if (!orderId || !customerId) {
+        throw new Error("Order ID and customer ID are required");
+      }
+
+      console.log(`=== DOWNLOAD RECEIPT ===`);
+      console.log(`Order ID: ${orderId}, Customer ID: ${customerId}`);
+
+      const receiptData = await this.orderModel.getOrderReceiptData(
+        parseInt(orderId),
+        customerId
+      );
+
+      if (!receiptData.success) {
+        throw new Error(receiptData.message);
+      }
+
+      return {
+        success: true,
+        data: receiptData.data,
+        message: "Receipt data retrieved successfully",
+      };
+    } catch (error) {
+      console.error("Error in downloadReceiptCtr:", error);
+      return {
+        success: false,
+        message: error.message || "Failed to generate receipt",
+      };
+    }
+  }
+
+  /**
+   * Update order status (pure function - Admin only)
+   * @param {number} orderId - Order ID
+   * @param {string} status - New order status
+   * @param {string} notes - Tracking notes
+   * @param {string} userRole - User role for authorization
+   * @returns {Object} Update result
+   */
+  async updateOrderStatusCtr(orderId, status, notes, userRole) {
+    try {
+      if (userRole !== 1) {
+        throw new Error("Admin access required");
+      }
+
+      if (!orderId || !status) {
+        throw new Error("Order ID and status are required");
+      }
+
+      console.log(`=== UPDATE ORDER STATUS (ADMIN) ===`);
+      console.log(`Order ID: ${orderId}, New Status: ${status}`);
+
+      const result = await this.orderModel.updateOrderTracking(
+        parseInt(orderId),
+        status,
+        notes
+      );
+
+      if (result.success) {
+        console.log(`Order ${orderId} status updated to: ${status}`);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error in updateOrderStatusCtr:", error);
+      return {
+        success: false,
+        message: error.message || "Failed to update order status",
+      };
+    }
+  }
+
+  /**
+   * Get all orders for admin (pure function)
+   * @param {number} limit - Maximum number of orders
+   * @returns {Object} All orders with customer details
+   */
+  async getAllOrdersForAdminCtr(limit = 100) {
+    try {
+      console.log(`=== GET ALL ORDERS FOR ADMIN ===`);
+      console.log(`Limit: ${limit}`);
+
+      const result = await this.orderModel.getAllOrdersForAdmin(limit);
+
+      if (result.success) {
+        console.log(`Found ${result.data.orders.length} orders for admin`);
+        return {
+          success: true,
+          data: {
+            orders: result.data.orders,
+            totalOrders: result.data.totalOrders,
+          },
+          message: result.message,
+        };
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error("Error in getAllOrdersForAdminCtr:", error);
+      return {
+        success: false,
+        message: error.message || "Failed to retrieve orders for admin",
+      };
+    }
+  }
+
+  /**
+   * Get order details for admin (pure function)
+   * @param {number} orderId - Order ID
+   * @returns {Object} Detailed order info for admin
+   */
+  async getAdminOrderDetailsCtr(orderId) {
+    try {
+      if (!orderId) {
+        throw new Error("Order ID is required");
+      }
+
+      console.log(`=== GET ADMIN ORDER DETAILS ===`);
+      console.log(`Order ID: ${orderId}`);
+
+      const orderResult = await this.orderModel.getAdminOrderDetails(
+        parseInt(orderId)
+      );
+
+      if (!orderResult.success) {
+        throw new Error(orderResult.message);
+      }
+
+      // Generate timeline
+      const timeline = this.orderModel.getOrderStatusTimeline(
+        orderResult.data.order.order_status,
+        orderResult.data.order.order_date,
+        orderResult.data.order.updated_at
+      );
+
+      console.log(
+        `Admin viewing order ${orderId} - status: ${orderResult.data.order.order_status}`
+      );
+
+      return {
+        success: true,
+        data: {
+          order: orderResult.data.order,
+          items: orderResult.data.items,
+          itemCount: orderResult.data.itemCount,
+          timeline: timeline.data || [],
+        },
+        message: "Admin order details retrieved successfully",
+      };
+    } catch (error) {
+      console.error("Error in getAdminOrderDetailsCtr:", error);
+      return {
+        success: false,
+        message: error.message || "Failed to retrieve admin order details",
+      };
+    }
+  }
+
+  /**
+   * Get order statistics for admin dashboard (pure function)
+   * @returns {Object} Order statistics by status
+   */
+  async getOrderStatsCtr() {
+    try {
+      console.log(`=== GET ORDER STATISTICS ===`);
+
+      const result = await this.orderModel.getOrderStatistics();
+
+      if (result.success) {
+        console.log("Order statistics retrieved:", result.data.stats);
+        return {
+          success: true,
+          data: {
+            stats: result.data.stats,
+          },
+          message: "Order statistics retrieved successfully",
+        };
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error("Error in getOrderStatsCtr:", error);
+      return {
+        success: false,
+        message: error.message || "Failed to retrieve order statistics",
       };
     }
   }

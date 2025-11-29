@@ -54,6 +54,50 @@ export async function getProductsCtr() {
   }
 }
 
+// Get Featured Product
+export async function getFeaturedProductCtr(limit = 1) {
+  try {
+    console.log("=== CONTROLLER: GET FEATURED PRODUCTS ===");
+    console.log("Limit requested:", limit);
+
+    // Validate limit parameter
+    if (limit && (isNaN(limit) || limit < 1 || limit > 100)) {
+      throw new Error("Limit must be a number between 1 and 100");
+    }
+
+    // Call the model method
+    const result = await Product.getFeaturedProducts(parseInt(limit));
+
+    console.log("Featured products retrieved:", result.count);
+
+    // Check if any featured products were found
+    if (!result || result.count === 0) {
+      return {
+        success: false,
+        message: "No featured products available",
+        data: {
+          products: [],
+          count: 0,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        products: result.products,
+        count: result.count,
+      },
+      message: `${result.count} featured product${
+        result.count > 1 ? "s" : ""
+      } retrieved successfully`,
+    };
+  } catch (error) {
+    console.error("Get featured products controller error:", error);
+    throw error;
+  }
+}
+
 // Get product by ID controller
 export async function getProductByIdCtr(productId) {
   try {

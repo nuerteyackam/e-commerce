@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Management - GameVault Admin</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <h2><a href="/admin">🎮 GameVault Admin</a></h2>
+      </div>
+      <div class="nav-links" id="topNavMenu">
+        <span>Loading...</span>
+      </div>
+    </nav>
+
+    <!-- Order Management Header -->
+    <section class="admin-header-section">
+      <div class="header-content">
+        <h1 class="page-title">📦 Order Management</h1>
+        <p class="page-subtitle">Track and manage all customer orders</p>
+
+        <!-- Order Stats -->
+        <div class="order-stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+              <span class="stat-number" id="pendingCount">-</span>
+              <span class="stat-label">Pending</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚙️</div>
+            <div class="stat-info">
+              <span class="stat-number" id="processingCount">-</span>
+              <span class="stat-label">Processing</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-info">
+              <span class="stat-number" id="shippedCount">-</span>
+              <span class="stat-label">Shipped</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <span class="stat-number" id="deliveredCount">-</span>
+              <span class="stat-label">Delivered</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Order Filters -->
+    <section class="order-filters-section">
+      <div class="filters-container">
+        <div class="filter-group">
+          <label for="statusFilter">Filter by Status:</label>
+          <select id="statusFilter" class="filter-select">
+            <option value="">All Orders</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="searchOrder">Search Orders:</label>
+          <input
+            type="text"
+            id="searchOrder"
+            class="filter-input"
+            placeholder="Order ID, customer name, or email..."
+          />
+        </div>
+
+        <div class="filter-group">
+          <button id="refreshOrders" class="btn-primary">🔄 Refresh</button>
+          <button id="exportOrders" class="btn-secondary">📊 Export</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Orders Table -->
+    <section class="orders-table-section">
+      <div class="table-container">
+        <div class="loading-spinner" id="ordersLoader" style="display: none">
+          <div class="spinner"></div>
+          <p>Loading orders...</p>
+        </div>
+
+        <div class="orders-table-wrapper">
+          <table class="orders-table" id="ordersTable">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <!-- Orders will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          class="no-orders-message"
+          id="noOrdersMessage"
+          style="display: none"
+        >
+          <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>No Orders Found</h3>
+            <p>No orders match your current filters.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Order Details Modal -->
+    <div class="modal-overlay" id="orderModalOverlay">
+      <div class="modal-container order-modal">
+        <div class="modal-header">
+          <h2>📋 Order Details</h2>
+          <button class="modal-close-btn" id="closeOrderModal">&times;</button>
+        </div>
+        <div class="modal-body" id="orderModalBody">
+          <!-- Order details will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal-overlay" id="statusModalOverlay">
+      <div class="modal-container status-modal">
+        <div class="modal-header">
+          <h2>🔄 Update Order Status</h2>
+          <button class="modal-close-btn" id="closeStatusModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="updateStatusForm" class="status-form">
+            <div class="form-group">
+              <label for="newStatus">New Status:</label>
+              <select id="newStatus" class="form-input" required>
+                <option value="pending">📝 Pending</option>
+                <option value="confirmed">✅ Confirmed</option>
+                <option value="processing">⚙️ Processing</option>
+                <option value="shipped">📦 Shipped</option>
+                <option value="delivered">🎉 Delivered</option>
+                <option value="cancelled">❌ Cancelled</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="trackingNotes">Tracking Notes (Optional):</label>
+              <textarea
+                id="trackingNotes"
+                class="form-input"
+                rows="3"
+                placeholder="Add notes about this status update..."
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn-secondary"
+                id="cancelStatusUpdate"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn-primary">Update Status</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="message-container" id="messageContainer"></div>
+
+    <!-- Core JavaScript -->
+    <script src="/JS/core.js"></script>
+
+    <!-- Order Management JavaScript -->
+    <script src="/JS/admin-orders.js"></script>
+  </body>
+</html>

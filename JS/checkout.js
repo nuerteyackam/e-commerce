@@ -3,6 +3,7 @@ console.log("Loading checkout.js at:", new Date().toISOString());
 // Global variables
 let orderData = null;
 let isProcessingPayment = false;
+let hasProcessedCheckout = false;
 
 // DOM elements
 let checkoutContainer, orderSummary, paymentBtn, backToCartBtn;
@@ -11,15 +12,70 @@ let paymentModal, confirmPaymentBtn, cancelPaymentBtn;
 let orderConfirmation, orderReference, orderTotal;
 
 // Initialize when DOM is loaded
+
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("Loading checkout page...");
+  console.log("=== CHECKOUT.JS DOM LOADED ===");
+  console.log("Current URL:", window.location.href);
+  console.log("Current pathname:", window.location.pathname);
+  console.log("===============================");
+
+  // Check if this is a paystack callback
+  if (window.location.pathname === "/paystack-callback") {
+    console.log(
+      "This is a Paystack callback - skipping normal checkout process"
+    );
+
+    return;
+  }
+
+  console.log("Loading normal checkout page...");
 
   initializeElements();
   setupEventListeners();
   await processCheckout();
 
+  // Update cart count after checkout is processed
+  await updateCheckoutCartCount();
+
   console.log("Checkout page initialized");
 });
+
+async function updateCheckoutCartCount() {
+  try {
+    console.log("🔍 Fetching cart data...");
+    const response = await fetch("/get-cart", {
+      credentials: "include",
+    });
+    const data = await response.json();
+
+    console.log("Full cart API response:", data);
+    console.log("Cart success:", data.success);
+    console.log("Cart data:", data.data);
+    console.log("Cart count:", data.data?.cartCount);
+    console.log("Items array:", data.data?.items);
+
+    if (data.success) {
+      const cartCount = data.data?.cartCount || 0;
+      const cartCountEl = document.getElementById("nav-cart-count");
+      if (cartCountEl) {
+        cartCountEl.textContent = cartCount;
+        console.log("Updated cart count to:", cartCount);
+      }
+    } else {
+      console.log("Cart fetch failed:", data);
+      const cartCountEl = document.getElementById("nav-cart-count");
+      if (cartCountEl) {
+        cartCountEl.textContent = "0";
+      }
+    }
+  } catch (error) {
+    console.error("Error updating cart count on checkout:", error);
+    const cartCountEl = document.getElementById("nav-cart-count");
+    if (cartCountEl) {
+      cartCountEl.textContent = "0";
+    }
+  }
+}
 
 // Initialize DOM elements
 function initializeElements() {
@@ -62,7 +118,16 @@ function setupEventListeners() {
 
 // Process checkout - create order from cart
 async function processCheckout() {
+  // Prevent multiple calls
+  if (hasProcessedCheckout) {
+    console.log("Checkout already processed, skipping...");
+    return;
+  }
+
   try {
+    console.log("Running processCheckout for the first time...");
+    hasProcessedCheckout = true; // Set flag immediately
+
     showLoading("Processing your order...");
 
     const response = await fetch("/process-checkout", {
@@ -77,60 +142,23 @@ async function processCheckout() {
 
     if (data.success) {
       orderData = data.data;
-
       showCheckoutForm();
 
       if (data.data.priceUpdated) {
         showMessage("info", "Some prices have been updated to current values");
       }
     } else {
+      // If checkout fails, reset the flag so user can try again
+      hasProcessedCheckout = false;
       showError(data.message || "Failed to process checkout");
     }
   } catch (error) {
+    // If checkout fails, reset the flag so user can try again
+    hasProcessedCheckout = false;
     console.error("Error processing checkout:", error);
     showError("Failed to process checkout. Please try again.");
   }
 }
-
-// // Display order summary
-// function displayOrderSummary() {
-//   if (!orderData || !summaryItems) return;
-
-//   const itemsHtml = orderData.items
-//     .map((item) => {
-//       const productImages = item.product_image
-//         ? JSON.parse(item.product_image)
-//         : [];
-//       const imageUrl =
-//         productImages.length > 0
-//           ? `/${productImages[0]}`
-//           : "/images/no-image.png";
-//       const itemTotal = (
-//         parseFloat(item.product_price) * parseInt(item.qty)
-//       ).toFixed(2);
-
-//       return `
-//       <div class="summary-item">
-//         <img src="${imageUrl}" alt="${item.product_title}" class="item-image"
-//              onerror="this.src='/images/no-image.png'">
-//         <div class="item-details">
-//           <h4>${item.product_title}</h4>
-//           <p>${item.category_name} - ${item.brand_name}</p>
-//           <p>$${parseFloat(item.product_price).toFixed(2)} × ${item.qty}</p>
-//         </div>
-//         <div class="item-total">
-//           $${itemTotal}
-//         </div>
-//       </div>
-//     `;
-//     })
-//     .join("");
-
-//   summaryItems.innerHTML = itemsHtml;
-
-//   if (summaryTotal) summaryTotal.textContent = `$${orderData.total.toFixed(2)}`;
-//   if (summaryItemCount) summaryItemCount.textContent = orderData.itemCount;
-// }
 
 // Show checkout form
 function showCheckoutForm() {
@@ -168,11 +196,11 @@ function showCheckoutForm() {
                 item.brand_name
               }</p>
                   <div class="item-pricing">
-                    <span class="item-price">$${parseFloat(
+                    <span class="item-price">₵${parseFloat(
                       item.product_price
                     ).toFixed(2)}</span>
                     <span class="item-quantity">× ${item.qty}</span>
-                    <span class="item-total">= $${itemTotal}</span>
+                    <span class="item-total">= ₵${itemTotal}</span>
                   </div>
                 </div>
               </div>
@@ -184,7 +212,7 @@ function showCheckoutForm() {
         <div class="summary-totals">
           <div class="summary-line">
             <span>Items (${orderData.itemCount}):</span>
-            <span>$${orderData.total.toFixed(2)}</span>
+            <span>₵${orderData.total.toFixed(2)}</span>
           </div>
           <div class="summary-line shipping">
             <span>Shipping:</span>
@@ -193,7 +221,7 @@ function showCheckoutForm() {
           <div class="summary-line total">
             <strong>
               <span>Total:</span>
-              <span id="summaryTotal">$${orderData.total.toFixed(2)}</span>
+              <span id="summaryTotal">₵${orderData.total.toFixed(2)}</span>
             </strong>
           </div>
         </div>
@@ -209,6 +237,9 @@ function showCheckoutForm() {
   // Re-initialize elements and event listeners
   initializeElements();
   setupEventListeners();
+
+  // Update cart count after form is shown
+  updateCheckoutCartCount();
 }
 
 // Show payment modal
@@ -217,7 +248,7 @@ function showPaymentModal() {
 
   document.getElementById(
     "modalOrderTotal"
-  ).textContent = `$${orderData.total.toFixed(2)}`;
+  ).textContent = `₵${orderData.total.toFixed(2)}`;
   document.getElementById("modalOrderRef").textContent =
     orderData.orderReference;
 
@@ -241,11 +272,18 @@ async function processPayment() {
     isProcessingPayment = true;
 
     // Update button state
-    confirmPaymentBtn.textContent = "Processing...";
+    confirmPaymentBtn.textContent = "Initializing...";
     confirmPaymentBtn.disabled = true;
     cancelPaymentBtn.disabled = true;
 
-    const response = await fetch("/process-payment", {
+    // Get customer email
+    const customerEmail = await getCustomerEmail();
+    if (!customerEmail) {
+      showPaymentError("Email is required for payment");
+      return;
+    }
+
+    const response = await fetch("/paystack-init-transaction", {
       method: "POST",
       credentials: "include",
       headers: {
@@ -254,14 +292,16 @@ async function processPayment() {
       body: JSON.stringify({
         orderId: orderData.orderId,
         amount: orderData.total,
+        email: customerEmail,
+        orderReference: orderData.orderReference,
       }),
     });
 
     const data = await response.json();
 
     if (data.success) {
-      hidePaymentModal();
-      showOrderConfirmation(data.data);
+      // Redirect to Paystack checkout
+      window.location.href = data.data.authorization_url;
     } else {
       showPaymentError(data.message || "Payment processing failed");
     }
@@ -272,40 +312,48 @@ async function processPayment() {
     isProcessingPayment = false;
 
     // Reset button state
-    confirmPaymentBtn.textContent = "Yes, I've Paid";
+    confirmPaymentBtn.textContent = "💳 Pay Now";
     confirmPaymentBtn.disabled = false;
     cancelPaymentBtn.disabled = false;
   }
 }
 
-// Show order confirmation
-function showOrderConfirmation(paymentData) {
-  if (!checkoutContainer) return;
+async function getCustomerEmail() {
+  try {
+    // Try to get from logged in user first
+    const userResponse = await fetch("/login/me", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  checkoutContainer.innerHTML = `
-    <div class="order-confirmation">
-      <div class="success-icon">✅</div>
-      <h2>Order Confirmed!</h2>
-      <div class="confirmation-details">
-        <p><strong>Order Reference:</strong> ${paymentData.orderReference}</p>
-        <p><strong>Invoice Number:</strong> ${paymentData.invoiceNo}</p>
-        <p><strong>Total Paid:</strong> $${paymentData.amount.toFixed(2)}</p>
-        <p><strong>Payment ID:</strong> ${paymentData.paymentId}</p>
-      </div>
-      <div class="confirmation-message">
-        <p>Thank you for your purchase! Your order has been successfully processed.</p>
-        <p>You can track your order using the reference number above.</p>
-      </div>
-      <div class="confirmation-actions">
-        <button onclick="window.location.href='/all-products'" class="btn-primary">
-          Continue Shopping
-        </button>
-        <button onclick="window.location.href='/orders'" class="btn-secondary">
-          View My Orders
-        </button>
-      </div>
-    </div>
-  `;
+    if (userResponse.ok) {
+      const userData = await userResponse.json();
+      if (userData.success && userData.data.email) {
+        return userData.data.email;
+      }
+    }
+    // If no user email, prompt for it
+    const email = prompt("Please enter your email address for payment:");
+
+    if (email && validateEmail(email)) {
+      return email;
+    } else {
+      alert("Please enter a valid email address");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting customer email:", error);
+    return null;
+  }
+}
+
+// Validate email format
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
 
 // Show payment error
@@ -381,3 +429,8 @@ function showMessage(type, message) {
     }
   }, 4000);
 }
+
+// Force cart count refresh with delay as backup
+setTimeout(async () => {
+  await updateCheckoutCartCount();
+}, 1000);

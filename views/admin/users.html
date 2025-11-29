@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Management - GameVault Admin</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <h2><a href="/admin">🎮 GameVault Admin</a></h2>
+      </div>
+      <div class="nav-links" id="topNavMenu">
+        <span>Loading...</span>
+      </div>
+    </nav>
+
+    <!-- User Management Header -->
+    <section class="admin-header-section">
+      <div class="header-content">
+        <h1 class="page-title">👥 User Management</h1>
+        <p class="page-subtitle">Manage customer accounts and user roles</p>
+
+        <!-- User Stats -->
+        <div class="order-stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <span class="stat-number" id="totalUsersCount">-</span>
+              <span class="stat-label">Total Users</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-info">
+              <span class="stat-number" id="customersCount">-</span>
+              <span class="stat-label">Customers</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔑</div>
+            <div class="stat-info">
+              <span class="stat-number" id="adminsCount">-</span>
+              <span class="stat-label">Admins</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-info">
+              <span class="stat-number" id="newUsersCount">-</span>
+              <span class="stat-label">New This Month</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User Filters -->
+    <section class="order-filters-section">
+      <div class="filters-container">
+        <div class="filter-group">
+          <label for="roleFilter">Filter by Role:</label>
+          <select id="roleFilter" class="filter-select">
+            <option value="">All Users</option>
+            <option value="1">Admins</option>
+            <option value="2">Customers</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="statusFilter">Filter by Status:</label>
+          <select id="statusFilter" class="filter-select">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="searchUser">Search Users:</label>
+          <input
+            type="text"
+            id="searchUser"
+            class="filter-input"
+            placeholder="Name, email, or user ID..."
+          />
+        </div>
+
+        <div class="filter-group">
+          <button id="refreshUsers" class="btn-primary">🔄 Refresh</button>
+          <button id="exportUsers" class="btn-secondary">📊 Export</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Users Table -->
+    <section class="orders-table-section">
+      <div class="table-container">
+        <div class="loading-spinner" id="usersLoader" style="display: none">
+          <div class="spinner"></div>
+          <p>Loading users...</p>
+        </div>
+
+        <div class="orders-table-wrapper">
+          <table class="orders-table" id="usersTable">
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Location</th>
+                <th>Orders</th>
+                <th>Total Spent</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <!-- Users will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          class="no-orders-message"
+          id="noUsersMessage"
+          style="display: none"
+        >
+          <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <h3>No Users Found</h3>
+            <p>No users match your current filters.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User Details Modal -->
+    <div class="modal-overlay" id="userModalOverlay">
+      <div class="modal-container order-modal">
+        <div class="modal-header">
+          <h2>👤 User Details</h2>
+          <button class="modal-close-btn" id="closeUserModal">&times;</button>
+        </div>
+        <div class="modal-body" id="userModalBody">
+          <!-- User details will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Update User Status Modal -->
+    <div class="modal-overlay" id="statusModalOverlay">
+      <div class="modal-container status-modal">
+        <div class="modal-header">
+          <h2>🔄 Update User Status</h2>
+          <button class="modal-close-btn" id="closeStatusModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="updateStatusForm" class="status-form">
+            <div class="form-group">
+              <label for="newStatus">User Status:</label>
+              <select id="newStatus" class="form-input" required>
+                <option value="active">✅ Active</option>
+                <option value="inactive">❌ Inactive</option>
+              </select>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn-secondary"
+                id="cancelStatusUpdate"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn-primary">Update Status</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update User Role Modal -->
+    <div class="modal-overlay" id="roleModalOverlay">
+      <div class="modal-container status-modal">
+        <div class="modal-header">
+          <h2>🔑 Update User Role</h2>
+          <button class="modal-close-btn" id="closeRoleModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="updateRoleForm" class="status-form">
+            <div class="form-group">
+              <label for="newRole">User Role:</label>
+              <select id="newRole" class="form-input" required>
+                <option value="2">👤 Customer</option>
+                <option value="1">🔑 Admin</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <div class="role-warning">
+                <p>
+                  <strong>⚠️ Warning:</strong> Changing user roles affects their
+                  system access permissions. Make sure you understand the
+                  implications.
+                </p>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" id="cancelRoleUpdate">
+                Cancel
+              </button>
+              <button type="submit" class="btn-primary">Update Role</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="message-container" id="messageContainer"></div>
+
+    <!-- Core JavaScript -->
+    <script src="/JS/core.js"></script>
+
+    <!-- User Management JavaScript -->
+    <script src="/JS/admin-users.js"></script>
+  </body>
+</html>

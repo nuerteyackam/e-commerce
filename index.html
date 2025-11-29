@@ -3,71 +3,547 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GameVault</title>
+    <title>GameVault - Admin Dashboard</title>
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
     <!-- Top Navigation Bar -->
     <nav class="top-nav">
       <div class="nav-brand">
-        <h2>GameVault</h2>
+        <h2><a href="/admin">🎮 GameVault Admin</a></h2>
       </div>
       <div class="nav-links" id="topNavMenu">
         <span>Loading...</span>
       </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container"></div>
+    <!-- Admin Hero Section -->
+    <section class="admin-hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title" id="adminWelcomeMessage">
+          Welcome to Admin Dashboard
+        </h1>
+        <p class="hero-subtitle">
+          Manage your GameVault store with powerful admin tools
+        </p>
+        <div class="admin-quick-stats" id="quickStats">
+          <div class="quick-stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-info">
+              <span class="stat-number" id="totalProducts">-</span>
+              <span class="stat-label">Total Products</span>
+            </div>
+          </div>
+          <div class="quick-stat-card">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-info">
+              <span class="stat-number" id="totalOrders">-</span>
+              <span class="stat-label">Total Orders</span>
+            </div>
+          </div>
+          <div class="quick-stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <span class="stat-number" id="totalUsers">-</span>
+              <span class="stat-label">Total Users</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Dashboard Cards -->
+    <section class="admin-dashboard-section">
+      <div class="dashboard-container">
+        <h2 class="section-title">Admin Management</h2>
+
+        <!-- Management Cards Grid -->
+        <div class="admin-cards-grid">
+          <!-- Categories Card - WORKING -->
+          <div
+            class="admin-card"
+            onclick="window.location.href='/admin/category'"
+          >
+            <div class="card-icon">🏷️</div>
+            <div class="card-content">
+              <h3>Categories</h3>
+              <p>Manage product categories</p>
+              <div class="card-stats">
+                <span id="categoryCount">-</span> categories
+              </div>
+            </div>
+            <div class="card-action">→</div>
+          </div>
+
+          <!-- Brands Card - WORKING -->
+          <div class="admin-card" onclick="window.location.href='/admin/brand'">
+            <div class="card-icon">🏢</div>
+            <div class="card-content">
+              <h3>Brands</h3>
+              <p>Manage product brands</p>
+              <div class="card-stats">
+                <span id="brandCount">-</span> brands
+              </div>
+            </div>
+            <div class="card-action">→</div>
+          </div>
+
+          <!-- Products Card - WORKING -->
+          <div
+            class="admin-card"
+            onclick="window.location.href='/admin/product'"
+          >
+            <div class="card-icon">📦</div>
+            <div class="card-content">
+              <h3>Products</h3>
+              <p>Manage store products</p>
+              <div class="card-stats">
+                <span id="productCount">-</span> products
+              </div>
+            </div>
+            <div class="card-action">→</div>
+          </div>
+
+          <div
+            class="admin-card"
+            onclick="window.location.href='/admin/orders'"
+          >
+            <div class="card-icon">🛒</div>
+            <div class="card-content">
+              <h3>Orders</h3>
+              <p>Manage customer orders</p>
+              <div class="card-stats">
+                <span id="orderCount">-</span> orders
+              </div>
+            </div>
+            <div class="card-action">→</div>
+          </div>
+
+          <div class="admin-card" onclick="window.location.href='/admin/users'">
+            <div class="card-icon">👥</div>
+            <div class="card-content">
+              <h3>Users</h3>
+              <p>Manage user accounts</p>
+              <div class="card-stats"><span id="userCount">-</span> users</div>
+            </div>
+            <div class="card-action">→</div>
+          </div>
+
+          <!-- Customer View Card - WORKING -->
+          <div class="admin-card" onclick="window.location.href='/'">
+            <div class="card-icon">🏠</div>
+            <div class="card-content">
+              <h3>Customer View</h3>
+              <p>View store as customer</p>
+              <div class="card-stats">Go to storefront</div>
+            </div>
+            <div class="card-action">→</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Activity Section -->
+    <section class="recent-activity-section">
+      <div class="activity-container">
+        <h2 class="section-title">Recent Activity</h2>
+        <div class="activity-grid">
+          <div class="activity-card">
+            <h3>🆕 Recent Orders</h3>
+            <div class="activity-list" id="recentOrders">
+              <div class="activity-item">
+                <span class="activity-text">Loading recent orders...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="activity-card">
+            <h3>📈 Quick Actions</h3>
+            <div class="quick-actions">
+              <button
+                class="action-btn"
+                onclick="window.location.href='/admin/product'"
+              >
+                ➕ Add Product
+              </button>
+              <button
+                class="action-btn"
+                onclick="window.location.href='/admin/category'"
+              >
+                🏷️ Add Category
+              </button>
+              <button
+                class="action-btn"
+                onclick="window.location.href='/admin/brand'"
+              >
+                🏢 Add Brand
+              </button>
+              <button class="action-btn" onclick="refreshDashboard()">
+                🔄 Refresh Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- System Status Section -->
+    <section class="system-status-section">
+      <div class="status-container">
+        <h2 class="section-title">System Status</h2>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-indicator green"></span>
+            <span class="status-text">Database Connected</span>
+          </div>
+          <div class="status-item">
+            <span class="status-indicator green"></span>
+            <span class="status-text">Payment Gateway Active</span>
+          </div>
+          <div class="status-item">
+            <span class="status-indicator green"></span>
+            <span class="status-text">All Systems Operational</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <script src="/JS/core.js"></script>
     <script>
       (async () => {
+        console.log("=== ADMIN DASHBOARD DEBUGGING ===");
+
         const loggedIn = await isLoggedIn();
+        console.log("Is logged in?", loggedIn);
+
         const topNavElement = document.getElementById("topNavMenu");
+        const adminWelcomeMessage = document.getElementById(
+          "adminWelcomeMessage"
+        );
 
         if (!loggedIn) {
-          // Top nav for NON-logged users - Show Register and Login
-          topNavElement.innerHTML =
-            '<a href="/pages/register.html" class="nav-link">Register</a><a href="/pages/login.html" class="nav-link">Login</a>';
-        } else {
-          // User IS logged in
-          const response = await getCurrentUser();
-          const currentUser = response?.user;
+          // Redirect non-logged users to login
+          window.location.href = "/pages/login.html";
+          return;
+        }
 
-          if (currentUser) {
-            // Check if user is admin
-            const userIsAdmin = await isAdmin();
-            if (userIsAdmin) {
-              // Admin user - show Category Management + user info + logout
-              topNavElement.innerHTML = `<a href="/admin/category" class="nav-link">Categories</a><a href="/admin/brand" class="nav-link">Brands</a><a href="/admin/product" class="nav-link">Products</a><span class="nav-user">Hi, ${currentUser.customer_name}</span><button id="nav-logout-btn" class="nav-logout-btn">Logout</button>`;
-            } else {
-              // Regular user - redirect to customer home page
-              window.location.href = "/";
-              return;
-            }
+        // User IS logged in
+        const response = await getCurrentUser();
+        console.log("User response:", response);
 
-            // Add logout functionality
-            const logoutBtn = document.getElementById("nav-logout-btn");
-            if (logoutBtn) {
-              logoutBtn.addEventListener("click", async () => {
-                try {
-                  const res = await fetch("/logout", { method: "POST" });
-                  const data = await res.json();
-                  if (data.success) {
-                    window.location.href = "/pages/login.html";
-                  } else {
-                    alert("Logout failed. Try again.");
-                  }
-                } catch (err) {
-                  console.error("Error logging out:", err);
-                  alert("Something went wrong.");
-                }
-              });
-            }
+        const currentUser = response?.data;
+        console.log("Current user data:", currentUser);
+
+        if (currentUser) {
+          // Check if user is admin
+          const userIsAdmin = await isAdmin();
+          console.log("Is admin?", userIsAdmin);
+
+          if (!userIsAdmin) {
+            // Non-admin user - redirect to customer home
+            window.location.href = "/";
+            return;
           }
+
+          // Update welcome message
+          adminWelcomeMessage.innerHTML = `Welcome back, <span style="color: var(--accent);">${
+            currentUser.name || currentUser.email || "Admin"
+          }</span>! 🎮`;
+
+          // Admin user - show navigation with Home option
+          topNavElement.innerHTML = `
+            <a href="/" class="nav-link">🏠 Home</a>
+            <a href="/admin/category" class="nav-link">Categories</a>
+            <a href="/admin/brand" class="nav-link">Brands</a>
+            <a href="/admin/product" class="nav-link">Products</a>
+            <span class="nav-user">Hi, ${
+              currentUser.name || currentUser.email || "Admin"
+            }</span>
+            <button id="nav-logout-btn" class="nav-logout-btn">Logout</button>
+          `;
+
+          // Add logout functionality
+          const logoutBtn = document.getElementById("nav-logout-btn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", async () => {
+              try {
+                const res = await fetch("/logout", {
+                  method: "POST",
+                  credentials: "include",
+                });
+                const data = await res.json();
+                if (data.success) {
+                  window.location.href = "/pages/login.html";
+                } else {
+                  alert("Logout failed. Try again.");
+                }
+              } catch (err) {
+                console.error("Error logging out:", err);
+                alert("Something went wrong.");
+              }
+            });
+          }
+
+          // Load dashboard data
+          await loadDashboardData();
+        } else {
+          console.error("No user data found despite being logged in");
+          window.location.href = "/pages/login.html";
         }
       })();
+
+      // Load dashboard statistics
+      async function loadDashboardData() {
+        try {
+          console.log("=== LOADING DASHBOARD DATA ===");
+
+          // Load existing data that works
+          console.log("1. Loading categories...");
+          await loadCategoriesCount();
+
+          console.log("2. Loading brands...");
+          await loadBrandsCount();
+
+          console.log("3. Loading products...");
+          await loadProductsCount();
+
+          // Load new endpoints for real data
+          console.log("4. Loading orders...");
+          await loadOrdersCount();
+
+          console.log("5. Loading users...");
+          await loadUsersCount();
+
+          console.log("6. Loading recent orders...");
+          await loadRecentOrders();
+
+          console.log("=== DASHBOARD DATA LOADING COMPLETE ===");
+        } catch (error) {
+          console.error("Error loading dashboard data:", error);
+        }
+      }
+
+      async function loadCategoriesCount() {
+        try {
+          console.log("Loading categories count...");
+          const response = await fetch("/fetch-categories");
+          const data = await response.json();
+          console.log("Categories response:", data);
+
+          if (data.success && data.categories) {
+            const count = Array.isArray(data.categories)
+              ? data.categories.length
+              : 0;
+            document.getElementById("categoryCount").textContent = count;
+          } else {
+            document.getElementById("categoryCount").textContent = "0";
+          }
+        } catch (error) {
+          console.error("Error loading categories count:", error);
+          document.getElementById("categoryCount").textContent = "0";
+        }
+      }
+
+      async function loadBrandsCount() {
+        try {
+          console.log("Loading brands count...");
+          const response = await fetch("/fetch-brands");
+          const data = await response.json();
+          console.log("Brands response:", data);
+
+          if (data.success && data.brands) {
+            const count = Array.isArray(data.brands) ? data.brands.length : 0;
+            document.getElementById("brandCount").textContent = count;
+          } else {
+            document.getElementById("brandCount").textContent = "0";
+          }
+        } catch (error) {
+          console.error("Error loading brands count:", error);
+          document.getElementById("brandCount").textContent = "0";
+        }
+      }
+
+      async function loadProductsCount() {
+        try {
+          console.log("Loading products count...");
+          const response = await fetch("/fetch-products");
+          const data = await response.json();
+          console.log("Products response:", data);
+
+          if (data.success && data.products) {
+            // ← Changed from data.data to data.products
+            const count = Array.isArray(data.products)
+              ? data.products.length
+              : 0;
+            document.getElementById("totalProducts").textContent = count;
+            document.getElementById("productCount").textContent = count;
+          } else {
+            document.getElementById("totalProducts").textContent = "0";
+            document.getElementById("productCount").textContent = "0";
+          }
+        } catch (error) {
+          console.error("Error loading products count:", error);
+          document.getElementById("totalProducts").textContent = "0";
+          document.getElementById("productCount").textContent = "0";
+        }
+      }
+      async function loadOrdersCount() {
+        try {
+          console.log("Loading orders count...");
+          const response = await fetch("/get/orders-count");
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Orders count response:", data);
+
+          if (data.success) {
+            document.getElementById("totalOrders").textContent =
+              data.data.count;
+            document.getElementById("orderCount").textContent = data.data.count;
+          } else {
+            document.getElementById("totalOrders").textContent = "0";
+            document.getElementById("orderCount").textContent = "0";
+          }
+        } catch (error) {
+          console.error("Error loading orders count:", error);
+          document.getElementById("totalOrders").textContent = "0";
+          document.getElementById("orderCount").textContent = "0";
+        }
+      }
+
+      async function loadUsersCount() {
+        try {
+          console.log("Loading users count...");
+          const response = await fetch("/get/users-count");
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Users count response:", data);
+
+          if (data.success) {
+            document.getElementById("totalUsers").textContent = data.data.count;
+            document.getElementById("userCount").textContent = data.data.count;
+          } else {
+            document.getElementById("totalUsers").textContent = "0";
+            document.getElementById("userCount").textContent = "0";
+          }
+        } catch (error) {
+          console.error("Error loading users count:", error);
+          document.getElementById("totalUsers").textContent = "0";
+          document.getElementById("userCount").textContent = "0";
+        }
+      }
+
+      async function loadRecentOrders() {
+        try {
+          console.log("Loading recent orders...");
+          const response = await fetch("/get/recent-orders");
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Recent orders response:", data);
+
+          const recentOrdersElement = document.getElementById("recentOrders");
+
+          if (data.success && data.data && data.data.length > 0) {
+            recentOrdersElement.innerHTML = data.data
+              .map(
+                (order) => `
+              <div class="activity-item">
+                <span class="activity-text">
+                  Order #${order.order_id} - $${parseFloat(
+                  order.order_total
+                ).toFixed(2)} 
+                  by ${order.customer_name || "Customer"}
+                </span>
+              </div>
+            `
+              )
+              .join("");
+          } else {
+            recentOrdersElement.innerHTML = `
+              <div class="activity-item">
+                <span class="activity-text">${
+                  data.message || "No recent orders found"
+                }</span>
+              </div>
+            `;
+          }
+        } catch (error) {
+          console.error("Error loading recent orders:", error);
+          document.getElementById("recentOrders").innerHTML = `
+            <div class="activity-item">
+              <span class="activity-text">Unable to load recent orders</span>
+            </div>
+          `;
+        }
+      }
+
+      function showComingSoon(featureName) {
+        alert(
+          `${featureName} feature is coming soon! 🚧\n\nThis feature is currently under development.`
+        );
+      }
+
+      function refreshDashboard() {
+        console.log("Refreshing dashboard data...");
+        loadDashboardData();
+
+        // Show success message
+        const message = document.createElement("div");
+        message.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: var(--accent);
+          color: var(--bg);
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          font-weight: bold;
+          z-index: 9999;
+          animation: slideInRight 0.3s ease;
+        `;
+        message.textContent = "Dashboard refreshed! 🔄";
+
+        document.body.appendChild(message);
+        setTimeout(() => message.remove(), 3000);
+      }
+
+      // Add slide-in animation CSS
+      const style = document.createElement("style");
+      style.textContent = `
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        .admin-card.disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        
+        .admin-card.disabled:hover {
+          transform: none;
+          border-color: rgba(255, 255, 255, 0.06);
+          box-shadow: none;
+        }
+      `;
+      document.head.appendChild(style);
     </script>
   </body>
 </html>

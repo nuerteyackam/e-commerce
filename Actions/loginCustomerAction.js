@@ -70,8 +70,14 @@ router.get("/me", async (req, res) => {
     );
 
     res.json({
+      success: true,
       loggedIn: true,
-      user: req.session.user,
+      data: {
+        id: req.session.user.customer_id,
+        name: req.session.user.customer_name,
+        email: req.session.user.customer_email,
+        user_role: req.session.user.user_role,
+      },
       cartCount: cartResult.success ? cartResult.data.totalQuantity : 0,
     });
   } else {
@@ -87,6 +93,7 @@ router.get("/me", async (req, res) => {
     }
 
     res.json({
+      success: false,
       loggedIn: false,
       cartCount: cartCount,
       guestSessionId: req.session.cartSessionId, // For debugging

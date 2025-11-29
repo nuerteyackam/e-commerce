@@ -1,6 +1,5 @@
 -- PostgreSQL-compatible SQL schema for "shoppn"
 
--- Table: customer (MUST BE FIRST - other tables reference it)
 CREATE TABLE customer (
     customer_id SERIAL PRIMARY KEY,
     customer_name VARCHAR(100) NOT NULL,
@@ -161,4 +160,67 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRE
 -- Update existing products to have current timestamp
 UPDATE products 
 SET updated_at = CURRENT_TIMESTAMP 
+WHERE updated_at IS NULL;
+
+-- Paystack integration - add only missing columns to existing payment table
+ALTER TABLE payment ADD COLUMN IF NOT EXISTS transaction_ref VARCHAR(255);
+ALTER TABLE payment ADD COLUMN IF NOT EXISTS authorization_code VARCHAR(255);
+ALTER TABLE payment ADD COLUMN IF NOT EXISTS payment_channel VARCHAR(100) DEFAULT 'card';
+
+-- Update payment_date to TIMESTAMP for better precision
+ALTER TABLE payment ALTER COLUMN payment_date TYPE TIMESTAMP;
+ALTER TABLE payment ALTER COLUMN payment_date SET DEFAULT NOW();
+
+-- Performance indexes
+CREATE INDEX IF NOT EXISTS idx_payment_transaction_ref ON payment (transaction_ref);
+CREATE INDEX IF NOT EXISTS idx_payment_order_id ON payment (order_id);
+
+ALTER TABLE orders ALTER COLUMN invoice_no TYPE VARCHAR(100);
+
+-- Create reviews table
+CREATE TABLE IF NOT EXISTS product_reviews (
+    review_id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(product_id) ON DELETE CASCADE,
+    customer_id INTEGER NOT NULL REFERENCES customer(customer_id) ON DELETE CASCADE,
+    order_id INTEGER REFERENCES orders(order_id), -- For verified purchase
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_title VARCHAR(200),
+    review_text TEXT,
+    is_verified_purchase BOOLEAN DEFAULT FALSE,
+    is_approved BOOLEAN DEFAULT TRUE, -- For moderation
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(product_id, customer_id, order_id) -- Prevent duplicate reviews per order
+);
+
+-- Create index for better performance
+CREATE INDEX IF NOT EXISTS idx_product_reviews_product_id ON product_reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_customer_id ON product_reviews(customer_id);
+
+
+
+
+-- Add tracking columns to orders table
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_notes TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Update existing orders to have updated_at timestamps
+UPDATE orders 
+SET updated_at = order_date 
+WHERE updated_at IS NULL;
+
+
+ALTER TABLE customer ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+
+UPDATE customer 
+SET created_at = CURRENT_TIMESTAMP 
+WHERE created_at IS NULL;
+
+-- Add updated_at column to customer table
+ALTER TABLE customer ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Update existing customers to have current timestamp for updated_at
+UPDATE customer 
+SET updated_at = created_at 
 WHERE updated_at IS NULL;

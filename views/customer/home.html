@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>E-Commerce Store</title>
+    <title>GameVault - Your Gaming Paradise</title>
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
     <nav class="top-nav">
       <div class="nav-brand">
-        <h2><a href="/">GameVault</a></h2>
+        <h2><a href="/">🎮 GameVault</a></h2>
       </div>
       <div class="nav-links">
         <a href="/" class="nav-link">Home</a>
@@ -18,61 +18,223 @@
           Cart (<span class="cart-count" id="nav-cart-count">0</span>)
         </a>
         <a href="/orders" class="nav-link">My Orders</a>
-
         <span id="userInfo">Loading...</span>
       </div>
     </nav>
 
-    <div class="container">
-      <div class="page-header">
-        <h1 id="welcomeMessage">Welcome to GameVault</h1>
-        <p>Discover amazing products at great prices</p>
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title" id="welcomeMessage">Welcome to GameVault</h1>
+        <p class="hero-subtitle">
+          Your ultimate destination for gaming excellence
+        </p>
+        <div class="cta-buttons">
+          <a href="/all-products" class="btn-primary">🛍️ Shop Now</a>
+          <a href="/cart" class="btn-secondary">🛒 View Cart</a>
+        </div>
       </div>
+    </section>
 
-      <div style="text-align: center; margin: 3rem 0">
-        <a
-          href="/all-products"
-          class="btn-view"
-          style="padding: 1rem 2rem; font-size: 1.1rem"
+    <!-- Video Game Showcase Section -->
+    <section class="video-showcase-section">
+      <div class="showcase-container">
+        <div class="video-container">
+          <video id="gameplayVideo" muted loop autoplay playsinline>
+            <source src="/videos/gameplay-trailer.mp4" type="video/mp4" />
+            <source src="/videos/gameplay-trailer.webm" type="video/webm" />
+            <!-- Fallback for browsers that don't support video -->
+          </video>
+
+          <!-- Video Overlay Content -->
+          <div class="video-overlay">
+            <div class="overlay-content">
+              <h2 class="showcase-title">Experience Epic Gaming</h2>
+              <p class="showcase-subtitle">
+                Discover the latest releases and timeless classics
+              </p>
+
+              <!-- Game Info Cards -->
+              <div class="game-info-cards">
+                <div class="info-card">
+                  <div class="info-icon">🎮</div>
+                  <div class="info-text">
+                    <h4>Latest Releases</h4>
+                    <p>Brand new games</p>
+                  </div>
+                </div>
+                <div class="info-card">
+                  <div class="info-icon">🏆</div>
+                  <div class="info-text">
+                    <h4>Award Winners</h4>
+                    <p>Critically acclaimed</p>
+                  </div>
+                </div>
+                <div class="info-card">
+                  <div class="info-icon">💫</div>
+                  <div class="info-text">
+                    <h4>Exclusive Deals</h4>
+                    <p>Special offers</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="showcase-actions">
+                <button
+                  class="btn-primary"
+                  onclick="window.location.href='/all-products'"
+                >
+                  🛍️ Shop All Games
+                </button>
+                <button
+                  class="btn-secondary video-control-btn"
+                  onclick="toggleVideo()"
+                >
+                  <span id="playPauseIcon">⏸️</span>
+                  <span id="playPauseText">Pause</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Video Controls -->
+          <div class="video-controls">
+            <button class="control-btn mute-btn" onclick="toggleMute()">
+              <span id="muteIcon">🔇</span>
+            </button>
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+            </div>
+            <button
+              class="control-btn fullscreen-btn"
+              onclick="toggleFullscreen()"
+            >
+              <span>⛶</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Stats Section -->
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-number" id="productCount" style="color: goldenrod"
+            >500+</span
+          >
+          <div class="stat-label">Products Available</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="customerCount" style="color: goldenrod"
+            >10K+</span
+          >
+          <div class="stat-label">Happy Customers</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" style="color: goldenrod">24/7</span>
+          <div class="stat-label">Customer Support</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">⭐⭐⭐⭐⭐</span>
+          <div class="stat-label">5-Star Reviews</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="featured-section">
+      <h2 class="section-title">Featured Products</h2>
+      <div class="product-preview" id="featuredProducts">
+        <!-- This will be populated by JavaScript -->
+        <div class="product-card">
+          <div class="product-placeholder">🎮</div>
+          <h3>Latest Games</h3>
+          <p>Discover the newest releases</p>
+        </div>
+        <div class="product-card">
+          <div class="product-placeholder">🏆</div>
+          <h3>Best Sellers</h3>
+          <p>Most popular products</p>
+        </div>
+        <div class="product-card">
+          <div class="product-placeholder">💰</div>
+          <h3>Special Deals</h3>
+          <p>Limited time offers</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+      <h2>Ready to Level Up Your Gaming?</h2>
+      <p>Join thousands of gamers who trust GameVault for their gaming needs</p>
+      <div class="cta-buttons">
+        <a href="/all-products" class="btn-primary">Browse All Products</a>
+        <a href="/pages/register.html" class="btn-secondary" id="registerLink"
+          >Create Account</a
         >
-          Browse All Products
-        </a>
       </div>
+    </section>
 
-      <div
-        id="adminLink"
-        style="text-align: center; margin: 2rem 0; display: none"
-      >
-        <p><a href="/admin">Admin Dashboard</a></p>
-      </div>
+    <div
+      id="adminLink"
+      style="text-align: center; margin: 2rem 0; display: none"
+    >
+      <p>
+        <a href="/admin" style="color: #667eea; font-weight: bold"
+          >🔧 Admin Dashboard</a
+        >
+      </p>
     </div>
 
     <script src="/JS/core.js"></script>
     <script>
       (async () => {
+        console.log("=== HOME PAGE DEBUGGING ===");
+
         const loggedIn = await isLoggedIn();
+        console.log("Is logged in:", loggedIn);
+
         const navMenu = document.getElementById("navMenu");
         const welcomeMessage = document.getElementById("welcomeMessage");
         const adminLink = document.getElementById("adminLink");
+        const registerLink = document.getElementById("registerLink");
 
         // Update cart count when page loads
         await updateCartCountDisplay();
 
         if (!loggedIn) {
+          console.log("User not logged in, showing login/register links");
           // Not logged in - show login/register
           document.getElementById("userInfo").innerHTML =
             '<a href="/pages/login.html" class="nav-link">Login</a><a href="/pages/register.html" class="nav-link">Register</a>';
         } else {
           // User is logged in
-          const response = await getCurrentUser();
-          const currentUser = response?.user;
+          console.log("User is logged in, getting user data...");
 
-          if (currentUser) {
-            // Update welcome message
-            welcomeMessage.textContent = `Welcome back, ${currentUser.customer_name}!`;
+          const response = await getCurrentUser();
+          console.log("getCurrentUser full response:", response);
+
+          const currentUser = response?.data;
+          console.log("Current user from data:", currentUser);
+
+          if (currentUser && currentUser.name) {
+            console.log("User data found, updating UI ...");
+
+            // Update welcome message with animation
+            welcomeMessage.innerHTML = `Welcome back, <span style="color: #ffd700;">${currentUser.name}</span>! 🎉`;
+
+            // Hide register button for logged in users
+            if (registerLink) {
+              registerLink.style.display = "none";
+            }
 
             // Check if admin
             const userIsAdmin = await isAdmin();
+            console.log("User is admin:", userIsAdmin);
+
             if (userIsAdmin) {
               adminLink.style.display = "block";
             }
@@ -80,18 +242,21 @@
             // Show user info and logout
             document.getElementById(
               "userInfo"
-            ).innerHTML = `<span class="nav-user">Hi, ${currentUser.customer_name}</span><button id="logoutBtn" class="nav-logout-btn">Logout</button>`;
+            ).innerHTML = `<span class="nav-user">Hi, ${currentUser.name}</span><button id="logoutBtn" class="nav-logout-btn">Logout</button>`;
 
             // Add logout functionality
             const logoutBtn = document.getElementById("logoutBtn");
             if (logoutBtn) {
               logoutBtn.addEventListener("click", async () => {
                 try {
+                  console.log("Logging out...");
                   const res = await fetch("/logout", { method: "POST" });
                   const data = await res.json();
                   if (data.success) {
+                    console.log("Logout successful");
                     window.location.href = "/pages/login.html";
                   } else {
+                    console.log("Logout failed:", data);
                     alert("Logout failed. Try again.");
                   }
                 } catch (err) {
@@ -100,8 +265,18 @@
                 }
               });
             }
+          } else {
+            console.log("No user data found or invalid structure");
+            console.log("Response structure:", response);
+
+            // Fallback - show login/register links
+            document.getElementById("userInfo").innerHTML =
+              '<a href="/pages/login.html" class="nav-link">Login</a><a href="/pages/register.html" class="nav-link">Register</a>';
           }
         }
+
+        // Animate stats on scroll
+        animateStatsOnScroll();
       })();
 
       // Function to update cart count display
@@ -115,16 +290,19 @@
             },
           });
 
+          console.log("Cart count response status:", response.status);
           const data = await response.json();
+          console.log("Cart count response data:", data);
 
           if (data.success) {
-            const cartCount = data.data.itemCount || 0;
+            const cartCount = data.data?.totalQuantity || 0;
             const cartCountEl = document.getElementById("nav-cart-count");
             if (cartCountEl) {
               cartCountEl.textContent = cartCount;
+              console.log("Updated cart count to:", cartCount);
             }
           } else {
-            // Cart is empty or error occurred
+            console.log("Cart count failed:", data.message);
             const cartCountEl = document.getElementById("nav-cart-count");
             if (cartCountEl) {
               cartCountEl.textContent = "0";
@@ -132,11 +310,27 @@
           }
         } catch (error) {
           console.error("Error updating cart count:", error);
-          // Set cart count to 0 on error
           const cartCountEl = document.getElementById("nav-cart-count");
           if (cartCountEl) {
             cartCountEl.textContent = "0";
           }
+        }
+      }
+
+      // Animate stats on scroll
+      function animateStatsOnScroll() {
+        const statsSection = document.querySelector(".stats-section");
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Trigger animation
+              console.log("Stats section in view, triggering animations");
+            }
+          });
+        });
+
+        if (statsSection) {
+          observer.observe(statsSection);
         }
       }
 
@@ -150,6 +344,85 @@
       // Listen for custom cart update events
       document.addEventListener("cartUpdated", () => {
         updateCartCountDisplay();
+      });
+
+      // Video control functions
+      let isPlaying = true;
+      let isMuted = true;
+
+      function toggleVideo() {
+        const video = document.getElementById("gameplayVideo");
+        const playPauseIcon = document.getElementById("playPauseIcon");
+        const playPauseText = document.getElementById("playPauseText");
+
+        if (isPlaying) {
+          video.pause();
+          playPauseIcon.textContent = "▶️";
+          playPauseText.textContent = "Play";
+          isPlaying = false;
+        } else {
+          video.play();
+          playPauseIcon.textContent = "⏸️";
+          playPauseText.textContent = "Pause";
+          isPlaying = true;
+        }
+      }
+
+      function toggleMute() {
+        const video = document.getElementById("gameplayVideo");
+        const muteIcon = document.getElementById("muteIcon");
+
+        if (isMuted) {
+          video.muted = false;
+          muteIcon.textContent = "🔊";
+          isMuted = false;
+        } else {
+          video.muted = true;
+          muteIcon.textContent = "🔇";
+          isMuted = true;
+        }
+      }
+
+      function toggleFullscreen() {
+        const video = document.getElementById("gameplayVideo");
+
+        if (video.requestFullscreen) {
+          video.requestFullscreen();
+        } else if (video.webkitRequestFullscreen) {
+          video.webkitRequestFullscreen();
+        } else if (video.mozRequestFullScreen) {
+          video.mozRequestFullScreen();
+        }
+      }
+
+      // Update progress bar
+      function updateProgress() {
+        const video = document.getElementById("gameplayVideo");
+        const progressFill = document.getElementById("progressFill");
+
+        if (video && progressFill) {
+          const percent = (video.currentTime / video.duration) * 100;
+          progressFill.style.width = percent + "%";
+        }
+      }
+
+      // Initialize video controls
+      document.addEventListener("DOMContentLoaded", () => {
+        const video = document.getElementById("gameplayVideo");
+        if (video) {
+          video.addEventListener("timeupdate", updateProgress);
+
+          // Auto-play with user interaction fallback
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              console.log("Auto-play prevented, user interaction required");
+              isPlaying = false;
+              document.getElementById("playPauseIcon").textContent = "▶️";
+              document.getElementById("playPauseText").textContent = "Play";
+            });
+          }
+        }
       });
     </script>
   </body>

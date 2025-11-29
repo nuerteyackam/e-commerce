@@ -116,7 +116,7 @@ function createCartItemHtml(item) {
                 <h4 class="item-title">${item.product_title}</h4>
                 <p class="item-category">${item.category_name}</p>
                 <p class="item-brand">${item.brand_name}</p>
-                <p class="item-price">$${parseFloat(item.product_price).toFixed(
+                <p class="item-price">₵${parseFloat(item.product_price).toFixed(
                   2
                 )} each</p>
                 <p class="item-stock">Stock: ${item.stock_qty}</p>
@@ -144,7 +144,7 @@ function createCartItemHtml(item) {
                 </div>
             </div>
             <div class="item-total">
-                <span class="total-price">$${itemTotal}</span>
+                <span class="total-price">₵${itemTotal}</span>
                 <button class="remove-btn" onclick="removeFromCart(${
                   item.product_id
                 })">
@@ -157,9 +157,9 @@ function createCartItemHtml(item) {
 
 // Update cart summary
 function updateCartSummary() {
-  if (cartSubtotal) cartSubtotal.textContent = `$${cartTotal.toFixed(2)}`;
+  if (cartSubtotal) cartSubtotal.textContent = `₵${cartTotal.toFixed(2)}`;
   if (cartTotalElement)
-    cartTotalElement.textContent = `$${cartTotal.toFixed(2)}`;
+    cartTotalElement.textContent = `₵${cartTotal.toFixed(2)}`;
   if (cartItemCount) cartItemCount.textContent = cartItems.length;
 }
 

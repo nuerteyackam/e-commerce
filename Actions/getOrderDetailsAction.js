@@ -4,7 +4,7 @@ import orderController from "../controllers/orderController.js";
 const router = express.Router();
 
 /**
- * Get order details with products
+ * Get order details with products and tracking timeline
  * GET /get-order-details/:orderId
  */
 router.get("/:orderId", async (req, res) => {
@@ -29,8 +29,8 @@ router.get("/:orderId", async (req, res) => {
       });
     }
 
-    // Call controller method
-    const result = await orderController.getOrderDetailsCtr(
+    // Call enhanced controller method with tracking
+    const result = await orderController.getOrderDetailsWithTrackingCtr(
       parseInt(orderId),
       customerId
     );
