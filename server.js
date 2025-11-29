@@ -5,8 +5,6 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import session from "express-session";
-import helmet from "helmet";
-import compression from "compression";
 
 import { ensureCartSession } from "./middleware/cartSession.js";
 
@@ -17,47 +15,9 @@ dotenv.config();
 
 const app = express();
 
-// Production enabling code
-if (process.env.NODE_ENV === "production") {
-  // Enable compression
-  app.use(compression());
-
-  // security headers (relaxed for HTTP)
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", "data:", "blob:", "http:", "https:"],
-          connectSrc: ["'self'", "https://api.paystack.co"],
-        },
-      },
-      forceHTTPSRedirect: false,
-      hsts: false,
-    })
-  );
-
-  console.log("Running in PRODUCTION mode (HTTP)");
-} else {
-  console.log("Running in DEVELOPMENT mode");
-}
-
-// CORS - allow digital ocean IP
-const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? [`http://128.199.4.236:5000`, `http://128.199.4.236`] // Digital Ocean IP
-      : true,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-};
-
-app.use(cors(corsOptions));
-app.use(bodyParser.json({ limit: "10mb" })); // Max 10MB per request
-app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(
   session({
@@ -70,59 +30,32 @@ app.use(
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: "lax",
     },
-    name: "gamevault.sid",
+    name: "sessionId",
     rolling: true,
   })
 );
 
-// Enhanced logging for production
 app.use((req, res, next) => {
-  if (process.env.NODE_ENV === "production") {
-    // Log important routes in production
-    if (
-      req.path.includes("/login") ||
-      req.path.includes("/checkout") ||
-      req.path.includes("/paystack")
-    ) {
-      console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-    }
-  } else {
-    // Full logging in development
-    if (
-      req.path.includes("/login") ||
-      req.path.includes("/checkout") ||
-      req.path.includes("/paystack")
-    ) {
-      console.log(`[${req.path}] Session ID:`, req.sessionID);
-      console.log(
-        `[${req.path}] Session user:`,
-        req.session.user ? "Logged in" : "Not logged in"
-      );
-    }
+  // Only log session info for auth and checkout routes
+  if (
+    req.path.includes("/login") ||
+    req.path.includes("/checkout") ||
+    req.path.includes("/paystack")
+  ) {
+    console.log(`[${req.path}] Session ID:`, req.sessionID);
+    console.log(
+      `[${req.path}] Session user:`,
+      req.session.user ? "Logged in" : "Not logged in"
+    );
   }
   next();
 });
 
 app.use(ensureCartSession);
 
-// Static files with caching
-app.use(
-  express.static(path.join(dirname, "public"), {
-    maxAge: process.env.NODE_ENV === "production" ? "1d" : "0",
-  })
-);
-app.use(
-  "/JS",
-  express.static(path.join(dirname, "JS"), {
-    maxAge: process.env.NODE_ENV === "production" ? "1h" : "0",
-  })
-);
-app.use(
-  "/uploads",
-  express.static(path.join(dirname, "uploads"), {
-    maxAge: process.env.NODE_ENV === "production" ? "1d" : "0",
-  })
-);
+app.use(express.static(path.join(dirname, "public")));
+app.use("/JS", express.static(path.join(dirname, "JS")));
+app.use("/uploads", express.static(path.join(dirname, "uploads")));
 
 // Import existing action routers
 import registerRouter from "./Actions/registerCustomerAction.js";
@@ -329,34 +262,4 @@ app.get("/admin/users", (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`App URL: http://128.199.4.236:${PORT}`);
-
-  if (process.env.NODE_ENV === "production") {
-    console.log("Production mode enabled (HTTP)");
-    console.log("unning on HTTP - HTTPS recommended for production");
-    console.log("Compression enabled");
-    console.log(" Security headers enabled (relaxed for HTTP)");
-
-    // Environment validation
-    const requiredEnvVars = [
-      "DB_HOST",
-      "DB_USER",
-      "DB_PASS",
-      "DB_NAME",
-      "PAYSTACK_SECRET_KEY",
-      "PAYSTACK_PUBLIC_KEY",
-    ];
-
-    const missingVars = requiredEnvVars.filter(
-      (varName) => !process.env[varName]
-    );
-    if (missingVars.length > 0) {
-      console.error("Missing required environment variables:", missingVars);
-    } else {
-      console.log("All required environment variables are set");
-    }
-  }
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
