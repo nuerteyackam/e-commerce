@@ -837,7 +837,7 @@ class OrderController {
   }
 
   /**
-   * Get order statistics for admin dashboard (pure function)
+   * Get order statistics for admin dashboard 
    * @returns {Object} Order statistics by status
    */
   async getOrderStatsCtr() {

@@ -117,7 +117,7 @@ BEGIN
     END IF;
 END $$;
 
--- Make columns NOT NULL (safe since brands table is empty)
+-- Make columns NOT NULL 
 ALTER TABLE brands ALTER COLUMN created_by SET NOT NULL;
 ALTER TABLE brands ALTER COLUMN category_id SET NOT NULL;
 

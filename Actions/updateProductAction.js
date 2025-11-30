@@ -38,7 +38,7 @@ const storage = multer.diskStorage({
     }
 
     const userId = req.session.user.user_id || req.session.user.customer_id;
-    console.log("Multer using user ID:", userId); //
+    console.log("Multer using user ID:", userId); 
 
     if (!userId) {
       console.error("Cannot determine user ID from session in multer");

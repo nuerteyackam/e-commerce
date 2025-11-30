@@ -82,7 +82,7 @@ async function updateNavigationUI() {
     const navLogin = document.getElementById("nav-login");
     const navLogoutBtn = document.getElementById("nav-logout-btn");
 
-    // Check for correct properties from your API response
+    // Check for correct properties from API response
     if (userData.success && userData.loggedIn && userData.data) {
       // User is logged in
       if (navUserName) {
@@ -124,13 +124,12 @@ async function updateNavigationUI() {
 }
 
 // Initialize when DOM is loaded
-// Update your core.js DOMContentLoaded event:
+
 document.addEventListener("DOMContentLoaded", async () => {
   const isCheckoutPage =
     window.location.pathname === "/checkout" ||
     window.location.pathname === "/paystack-callback";
 
-  // Update cart count if cart element exists and not on checkout page
   if (document.getElementById("nav-cart-count") && !isCheckoutPage) {
     await initializeCartCount();
   }

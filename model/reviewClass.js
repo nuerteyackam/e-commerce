@@ -218,7 +218,7 @@ class Review {
     }
   }
 
-  // Get recent reviews (for homepage or dashboard)
+  // Get recent reviews
   static async getRecentReviews(limit = 5) {
     try {
       const query = `

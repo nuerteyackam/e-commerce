@@ -69,7 +69,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch products",
-      error: error.message, // ← Added for debugging
+      error: error.message, //  Added for debugging
     });
   }
 });

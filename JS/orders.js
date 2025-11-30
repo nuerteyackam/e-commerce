@@ -273,7 +273,7 @@ async function showOrderDetails(orderId) {
 function displayOrderDetails(orderData) {
   const { order, items } = orderData;
 
-  // Only show date, no time in modal
+ 
   const orderDateTime = new Date(order.order_date);
   const orderDate = orderDateTime.toLocaleDateString("en-US", {
     weekday: "long",
@@ -653,7 +653,7 @@ function updateCartCountDisplay(count = 0) {
     }
   });
 
-  // Also update the specific nav cart count
+  // update the specific nav cart count
   const navCartCount = document.getElementById("nav-cart-count");
   if (navCartCount) {
     navCartCount.textContent = count;

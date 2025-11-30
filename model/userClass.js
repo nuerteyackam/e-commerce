@@ -258,8 +258,6 @@ class UserClass {
    */
   async updateUserStatus(userId, status) {
     try {
-      // For simplicity, we'll use updated_at to track activity
-      // You could add a dedicated status column to the customer table
       const updateTime =
         status === "active" ? "NOW()" : "NOW() - INTERVAL '60 days'";
 

@@ -438,7 +438,7 @@ function displayRelatedProducts(products) {
   relatedGrid.innerHTML = relatedHtml;
 }
 
-// Create related product card (simplified version)
+// Create related product card 
 function createRelatedProductCard(product) {
   const productImages = product.product_images || [];
   const imageUrl =
@@ -1005,7 +1005,6 @@ function updateCharacterCount() {
   }
 }
 
-// Submit review
 // Submit review
 async function submitReview(event) {
   event.preventDefault();

@@ -519,7 +519,7 @@ class Product {
     }
   }
 
-  // View single product (enhanced)
+  // View single product
   static async viewSingleProduct(productId) {
     try {
       const query = `

@@ -136,7 +136,6 @@ class UserController {
   async updateUserStatusCtr(userId, status, userRole) {
     try {
       if (userRole !== 1) {
-        // Admin role is 1 in your database
         throw new Error("Admin access required");
       }
 

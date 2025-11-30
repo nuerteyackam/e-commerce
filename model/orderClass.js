@@ -8,7 +8,7 @@ class OrderClass {
   }
 
   /**
-   * Create a new order (before payment - no invoice number yet)
+   * Create a new order 
    * @param {number} customerId - Customer ID
    * @param {string} orderReference - Unique order reference
    * @param {number} orderTotal - Total amount
